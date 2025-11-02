@@ -58,7 +58,7 @@ export default function SearchBar({ onSearch, initialQuery = '', initialIsAI = t
                 ? "Describe what you need... (e.g., 'businesswoman presenting in modern office')"
                 : "Search by keywords..."
             }
-            className="w-full px-6 py-4 pr-14 text-lg rounded-xl border-2 border-gray-200 focus:border-yellow-500 focus:outline-none shadow-lg transition-all"
+            className="w-full px-6 py-4 pr-14 text-lg rounded-xl border-2 border-gray-200 focus:border-yellow-500 focus:outline-none shadow-lg transition-all text-black"
           />
           <button
             type="submit"
