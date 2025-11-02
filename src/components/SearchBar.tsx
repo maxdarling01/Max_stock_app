@@ -26,7 +26,7 @@ export default function SearchBar({ onSearch, initialQuery = '', initialIsAI = t
           onClick={() => setIsAI(false)}
           className={`px-4 py-2 rounded-lg font-medium transition-all ${
             !isAI
-              ? 'bg-blue-800 text-white shadow-md'
+              ? 'bg-yellow-500 text-black shadow-md'
               : 'bg-white text-gray-600 hover:bg-gray-50'
           }`}
         >
@@ -38,7 +38,7 @@ export default function SearchBar({ onSearch, initialQuery = '', initialIsAI = t
           onClick={() => setIsAI(true)}
           className={`px-4 py-2 rounded-lg font-medium transition-all ${
             isAI
-              ? 'bg-blue-800 text-white shadow-md'
+              ? 'bg-yellow-500 text-black shadow-md'
               : 'bg-white text-gray-600 hover:bg-gray-50'
           }`}
         >
@@ -58,11 +58,11 @@ export default function SearchBar({ onSearch, initialQuery = '', initialIsAI = t
                 ? "Describe what you need... (e.g., 'businesswoman presenting in modern office')"
                 : "Search by keywords..."
             }
-            className="w-full px-6 py-4 pr-14 text-lg rounded-xl border-2 border-gray-200 focus:border-blue-800 focus:outline-none shadow-lg transition-all"
+            className="w-full px-6 py-4 pr-14 text-lg rounded-xl border-2 border-gray-200 focus:border-yellow-500 focus:outline-none shadow-lg transition-all"
           />
           <button
             type="submit"
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-3 bg-blue-800 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-3 bg-yellow-500 text-black rounded-lg hover:bg-yellow-400 transition-colors"
           >
             {isAI ? (
               <Sparkles className="w-5 h-5" />

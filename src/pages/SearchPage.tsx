@@ -90,7 +90,7 @@ export default function SearchPage() {
 
   return (
     <div>
-      <div className="bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 text-white">
+      <div className="bg-gradient-to-br from-black via-gray-900 to-black text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <SearchBar onSearch={handleSearch} initialQuery={query} initialIsAI={isAI} />
         </div>
@@ -99,7 +99,7 @@ export default function SearchPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {loading && (
           <div className="text-center py-8">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-800 border-t-transparent"></div>
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-yellow-500 border-t-transparent"></div>
             <p className="mt-4 text-gray-600 font-medium">
               {isAI ? 'AI is finding matches...' : 'Searching...'}
             </p>
@@ -125,7 +125,7 @@ export default function SearchPage() {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as SortOption)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-800 bg-white"
+                  className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-yellow-500 bg-white"
                 >
                   <option value="relevance">Sort by: Relevance</option>
                   <option value="downloads">Sort by: Most Downloaded</option>
@@ -156,7 +156,7 @@ export default function SearchPage() {
                               value={type}
                               checked={mediaType === type}
                               onChange={(e) => setMediaType(e.target.value as MediaType)}
-                              className="w-4 h-4 text-blue-800 focus:ring-blue-800"
+                              className="w-4 h-4 text-yellow-500 focus:ring-yellow-500"
                             />
                             <span className="ml-2 text-gray-700 capitalize">{type}</span>
                           </label>
@@ -177,7 +177,7 @@ export default function SearchPage() {
                               value={orient}
                               checked={orientation === orient}
                               onChange={(e) => setOrientation(e.target.value as Orientation)}
-                              className="w-4 h-4 text-blue-800 focus:ring-blue-800"
+                              className="w-4 h-4 text-yellow-500 focus:ring-yellow-500"
                             />
                             <span className="ml-2 text-gray-700 capitalize">{orient}</span>
                           </label>
@@ -198,7 +198,7 @@ export default function SearchPage() {
                               value={res}
                               checked={resolution === res}
                               onChange={(e) => setResolution(e.target.value as Resolution)}
-                              className="w-4 h-4 text-blue-800 focus:ring-blue-800"
+                              className="w-4 h-4 text-yellow-500 focus:ring-yellow-500"
                             />
                             <span className="ml-2 text-gray-700">{res}</span>
                           </label>
@@ -213,7 +213,7 @@ export default function SearchPage() {
                       <select
                         value={category}
                         onChange={(e) => setCategory(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-800"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-yellow-500"
                       >
                         {categories.map((cat) => (
                           <option key={cat} value={cat}>

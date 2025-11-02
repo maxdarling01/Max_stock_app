@@ -16,7 +16,7 @@ export default function AssetDetailPage() {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
         <h2 className="text-2xl font-bold text-gray-900 mb-4">Asset not found</h2>
-        <Link to="/" className="text-blue-800 hover:text-blue-600">
+        <Link to="/" className="text-yellow-500 hover:text-yellow-400">
           Return to homepage
         </Link>
       </div>
@@ -31,11 +31,11 @@ export default function AssetDetailPage() {
     <>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <nav className="flex items-center space-x-2 text-sm text-gray-600 mb-6">
-          <Link to="/" className="hover:text-blue-800 transition-colors">
+          <Link to="/" className="hover:text-yellow-500 transition-colors">
             Home
           </Link>
           <ChevronRight className="w-4 h-4" />
-          <Link to="/search" className="hover:text-blue-800 transition-colors">
+          <Link to="/search" className="hover:text-yellow-500 transition-colors">
             Search
           </Link>
           <ChevronRight className="w-4 h-4" />
@@ -53,7 +53,7 @@ export default function AssetDetailPage() {
               {asset.type === 'video' && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30">
                   <div className="w-20 h-20 rounded-full bg-white bg-opacity-90 flex items-center justify-center group-hover:scale-110 transition-transform cursor-pointer">
-                    <Play className="w-10 h-10 text-blue-800 ml-1" />
+                    <Play className="w-10 h-10 text-yellow-500 ml-1" />
                   </div>
                 </div>
               )}
@@ -118,7 +118,7 @@ export default function AssetDetailPage() {
                   {asset.tags.map((tag) => (
                     <span
                       key={tag}
-                      className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-blue-100 hover:text-blue-800 transition-colors cursor-pointer"
+                      className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-yellow-100 hover:text-yellow-800 transition-colors cursor-pointer"
                     >
                       {tag}
                     </span>
@@ -128,7 +128,7 @@ export default function AssetDetailPage() {
 
               <button
                 onClick={() => setShowDownloadModal(true)}
-                className="w-full py-4 bg-blue-800 text-white rounded-lg font-semibold hover:bg-blue-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
+                className="w-full py-4 bg-yellow-500 text-black rounded-lg font-semibold hover:bg-yellow-400 transition-all shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
               >
                 <Download className="w-5 h-5" />
                 <span>Download</span>

@@ -13,8 +13,8 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <Link to="/" className="flex items-center space-x-2 group">
-            <Camera className="w-8 h-8 text-blue-800 group-hover:text-blue-600 transition-colors" />
-            <span className="text-xl font-bold text-gray-900">StockAI</span>
+            <Camera className="w-8 h-8 text-yellow-500 group-hover:text-yellow-400 transition-colors" />
+            <span className="text-xl font-bold text-gray-900">Maximum Stock</span>
           </Link>
 
           <nav className="hidden md:flex items-center space-x-8">
@@ -22,8 +22,8 @@ export default function Header() {
               to="/"
               className={`${
                 isActive('/') || isActive('/search')
-                  ? 'text-blue-800 font-semibold'
-                  : 'text-gray-600 hover:text-blue-800'
+                  ? 'text-yellow-500 font-semibold'
+                  : 'text-gray-600 hover:text-yellow-500'
               } transition-colors`}
             >
               Browse
@@ -32,22 +32,22 @@ export default function Header() {
               to="/license"
               className={`${
                 isActive('/license')
-                  ? 'text-blue-800 font-semibold'
-                  : 'text-gray-600 hover:text-blue-800'
+                  ? 'text-yellow-500 font-semibold'
+                  : 'text-gray-600 hover:text-yellow-500'
               } transition-colors`}
             >
               License
             </Link>
             <a
               href="#about"
-              className="text-gray-600 hover:text-blue-800 transition-colors"
+              className="text-gray-600 hover:text-yellow-500 transition-colors"
             >
               About
             </a>
           </nav>
 
           <button
-            className="md:hidden p-2 text-gray-600 hover:text-blue-800 transition-colors"
+            className="md:hidden p-2 text-gray-600 hover:text-yellow-500 transition-colors"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? (
@@ -66,7 +66,7 @@ export default function Header() {
               to="/"
               className={`${
                 isActive('/') || isActive('/search')
-                  ? 'text-blue-800 font-semibold'
+                  ? 'text-yellow-500 font-semibold'
                   : 'text-gray-600'
               } py-2 text-lg`}
               onClick={() => setMobileMenuOpen(false)}
@@ -77,7 +77,7 @@ export default function Header() {
               to="/license"
               className={`${
                 isActive('/license')
-                  ? 'text-blue-800 font-semibold'
+                  ? 'text-yellow-500 font-semibold'
                   : 'text-gray-600'
               } py-2 text-lg`}
               onClick={() => setMobileMenuOpen(false)}

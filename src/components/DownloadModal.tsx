@@ -82,8 +82,8 @@ export default function DownloadModal({ asset, onClose }: DownloadModalProps) {
                       key={format.value}
                       className={`flex items-center justify-between p-4 border-2 rounded-lg cursor-pointer transition-all ${
                         selectedFormat === format.value
-                          ? 'border-blue-800 bg-blue-50'
-                          : 'border-gray-200 hover:border-blue-300'
+                          ? 'border-yellow-500 bg-yellow-50'
+                          : 'border-gray-200 hover:border-yellow-300'
                       }`}
                     >
                       <div className="flex items-center">
@@ -93,7 +93,7 @@ export default function DownloadModal({ asset, onClose }: DownloadModalProps) {
                           value={format.value}
                           checked={selectedFormat === format.value}
                           onChange={(e) => setSelectedFormat(e.target.value)}
-                          className="w-4 h-4 text-blue-800 focus:ring-blue-800"
+                          className="w-4 h-4 text-yellow-500 focus:ring-yellow-500"
                         />
                         <span className="ml-3 font-medium text-gray-900">
                           {format.label}
@@ -167,7 +167,7 @@ export default function DownloadModal({ asset, onClose }: DownloadModalProps) {
                     type="checkbox"
                     checked={agreedToTerms}
                     onChange={(e) => setAgreedToTerms(e.target.checked)}
-                    className="w-5 h-5 text-blue-800 rounded focus:ring-blue-800 mt-0.5"
+                    className="w-5 h-5 text-yellow-500 rounded focus:ring-yellow-500 mt-0.5"
                   />
                   <span className="ml-3 text-sm text-gray-700">
                     I agree to these license terms and understand the usage rights
@@ -178,10 +178,10 @@ export default function DownloadModal({ asset, onClose }: DownloadModalProps) {
               <button
                 onClick={handleDownload}
                 disabled={!canDownload}
-                className={`w-full py-4 rounded-lg font-semibold text-white flex items-center justify-center space-x-2 transition-all ${
+                className={`w-full py-4 rounded-lg font-semibold flex items-center justify-center space-x-2 transition-all ${
                   canDownload
-                    ? 'bg-blue-800 hover:bg-blue-700 shadow-lg hover:shadow-xl'
-                    : 'bg-gray-300 cursor-not-allowed'
+                    ? 'bg-yellow-500 text-black hover:bg-yellow-400 shadow-lg hover:shadow-xl'
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 }`}
               >
                 <Download className="w-5 h-5" />

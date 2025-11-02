@@ -9,8 +9,8 @@ interface AssetCardProps {
 
 export default function AssetCard({ asset, relevanceBadge }: AssetCardProps) {
   const badgeColors = {
-    'Perfect Match': 'bg-green-100 text-green-800',
-    'Great Match': 'bg-blue-100 text-blue-800',
+    'Perfect Match': 'bg-yellow-500 text-black',
+    'Great Match': 'bg-yellow-400 text-black',
     'Good Match': 'bg-gray-100 text-gray-800'
   };
 
@@ -28,7 +28,7 @@ export default function AssetCard({ asset, relevanceBadge }: AssetCardProps) {
         {asset.type === 'video' && (
           <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-20 group-hover:bg-opacity-30 transition-all">
             <div className="w-16 h-16 rounded-full bg-white bg-opacity-90 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <Film className="w-8 h-8 text-blue-800" />
+              <Film className="w-8 h-8 text-yellow-500" />
             </div>
           </div>
         )}
@@ -40,7 +40,7 @@ export default function AssetCard({ asset, relevanceBadge }: AssetCardProps) {
       </div>
 
       <div className="p-4">
-        <h3 className="font-semibold text-gray-900 mb-2 line-clamp-1 group-hover:text-blue-800 transition-colors">
+        <h3 className="font-semibold text-gray-900 mb-2 line-clamp-1 group-hover:text-yellow-500 transition-colors">
           {asset.title}
         </h3>
 
@@ -62,7 +62,7 @@ export default function AssetCard({ asset, relevanceBadge }: AssetCardProps) {
             </span>
           )}
 
-          <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-md text-xs font-medium">
+          <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-md text-xs font-medium">
             {asset.resolution}
           </span>
         </div>

@@ -20,15 +20,15 @@ export default function HomePage() {
 
   return (
     <div>
-      <div className="bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 text-white">
+      <div className="bg-gradient-to-br from-black via-gray-900 to-black text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28">
           <div className="text-center mb-12">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
               Find Perfect Stock Assets
               <br />
-              <span className="text-blue-300">with AI-Powered Search</span>
+              <span className="text-yellow-500">with AI-Powered Search</span>
             </h1>
-            <p className="text-lg sm:text-xl text-blue-100 max-w-2xl mx-auto mb-12">
+            <p className="text-lg sm:text-xl text-gray-300 max-w-2xl mx-auto mb-12">
               Search millions of royalty-free videos and photos using natural language.
               Powered by advanced AI to understand exactly what you need.
             </p>
@@ -45,7 +45,7 @@ export default function HomePage() {
               onClick={() => setSelectedCategory(null)}
               className={`px-4 py-2 rounded-full font-medium transition-all ${
                 selectedCategory === null
-                  ? 'bg-blue-800 text-white shadow-md'
+                  ? 'bg-yellow-500 text-black shadow-md'
                   : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
               }`}
             >
@@ -57,7 +57,7 @@ export default function HomePage() {
                 onClick={() => setSelectedCategory(category)}
                 className={`px-4 py-2 rounded-full font-medium transition-all ${
                   selectedCategory === category
-                    ? 'bg-blue-800 text-white shadow-md'
+                    ? 'bg-yellow-500 text-black shadow-md'
                     : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
                 }`}
               >

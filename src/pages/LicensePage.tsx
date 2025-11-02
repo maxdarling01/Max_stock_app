@@ -34,12 +34,12 @@ export default function LicensePage() {
 
   return (
     <div>
-      <div className="bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 text-white">
+      <div className="bg-gradient-to-br from-black via-gray-900 to-black text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
           <h1 className="text-4xl sm:text-5xl font-bold mb-6">
             Simple, Royalty-Free Licensing
           </h1>
-          <p className="text-xl text-blue-100 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
             Use our assets with confidence. Our straightforward license covers all your needs.
           </p>
         </div>
@@ -105,23 +105,23 @@ export default function LicensePage() {
             </div>
           </div>
 
-          <div className="bg-blue-50 rounded-xl p-6 border-2 border-blue-200">
+          <div className="bg-yellow-50 rounded-xl p-6 border-2 border-yellow-200">
             <h3 className="font-bold text-gray-900 mb-3 text-lg">Important Notes</h3>
             <ul className="space-y-2 text-sm text-gray-700">
               <li className="flex items-start">
-                <span className="text-blue-600 mr-2 mt-0.5">•</span>
+                <span className="text-yellow-600 mr-2 mt-0.5">•</span>
                 <span>License is granted upon download and is perpetual</span>
               </li>
               <li className="flex items-start">
-                <span className="text-blue-600 mr-2 mt-0.5">•</span>
+                <span className="text-yellow-600 mr-2 mt-0.5">•</span>
                 <span>No attribution required, but always appreciated</span>
               </li>
               <li className="flex items-start">
-                <span className="text-blue-600 mr-2 mt-0.5">•</span>
+                <span className="text-yellow-600 mr-2 mt-0.5">•</span>
                 <span>Assets can be used worldwide without geographical restrictions</span>
               </li>
               <li className="flex items-start">
-                <span className="text-blue-600 mr-2 mt-0.5">•</span>
+                <span className="text-yellow-600 mr-2 mt-0.5">•</span>
                 <span>License covers derivative works created from the original assets</span>
               </li>
             </ul>
@@ -143,7 +143,7 @@ export default function LicensePage() {
                   className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
                 >
                   <div className="flex items-center space-x-3">
-                    <HelpCircle className="w-5 h-5 text-blue-800 flex-shrink-0" />
+                    <HelpCircle className="w-5 h-5 text-yellow-500 flex-shrink-0" />
                     <span className="font-semibold text-gray-900">{faq.question}</span>
                   </div>
                   <svg
@@ -172,14 +172,14 @@ export default function LicensePage() {
           </div>
         </div>
 
-        <div className="text-center bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 text-white rounded-2xl p-12">
+        <div className="text-center bg-gradient-to-br from-black via-gray-900 to-black text-white rounded-2xl p-12">
           <h2 className="text-3xl font-bold mb-4">Ready to Get Started?</h2>
-          <p className="text-blue-100 mb-8 text-lg">
+          <p className="text-gray-300 mb-8 text-lg">
             Browse thousands of royalty-free assets and start creating today.
           </p>
           <Link
             to="/"
-            className="inline-block px-8 py-4 bg-white text-blue-800 font-semibold rounded-lg hover:bg-blue-50 transition-all shadow-lg hover:shadow-xl"
+            className="inline-block px-8 py-4 bg-yellow-500 text-black font-semibold rounded-lg hover:bg-yellow-400 transition-all shadow-lg hover:shadow-xl"
           >
             Start Browsing Assets
           </Link>
