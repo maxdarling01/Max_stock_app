@@ -39,12 +39,12 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
         <div className="bg-white rounded-xl shadow-2xl p-8">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-slate-900 mb-2">Create Account</h1>
-            <p className="text-slate-600">Join thousands of creators finding premium assets</p>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Create Account</h1>
+            <p className="text-gray-600">Join thousands of creators finding premium assets</p>
           </div>
 
           {error && (
@@ -56,88 +56,88 @@ export default function SignUpPage() {
 
           <form onSubmit={handleSignUp} className="space-y-5">
             <div>
-              <label htmlFor="fullName" className="block text-sm font-medium text-slate-700 mb-2">
+              <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-2">
                 Full Name
               </label>
               <div className="relative">
-                <User className="absolute left-3 top-3.5 w-5 h-5 text-slate-400" />
+                <User className="absolute left-3 top-3.5 w-5 h-5 text-gray-400" />
                 <input
                   id="fullName"
                   type="text"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="Your full name"
-                  className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition"
                   disabled={loading}
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                 Email Address
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-3.5 w-5 h-5 text-slate-400" />
+                <Mail className="absolute left-3 top-3.5 w-5 h-5 text-gray-400" />
                 <input
                   id="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="your@email.com"
-                  className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition"
                   disabled={loading}
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-2">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
                 Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-3.5 w-5 h-5 text-slate-400" />
+                <Lock className="absolute left-3 top-3.5 w-5 h-5 text-gray-400" />
                 <input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Minimum 8 characters"
-                  className="w-full pl-10 pr-10 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                  className="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition"
                   disabled={loading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3.5 text-slate-400 hover:text-slate-600"
+                  className="absolute right-3 top-3.5 text-gray-400 hover:text-gray-600"
                   disabled={loading}
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
-              <p className="text-xs text-slate-500 mt-1.5">Must be at least 8 characters</p>
+              <p className="text-xs text-gray-500 mt-1.5">Must be at least 8 characters</p>
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-2.5 rounded-lg transition duration-200 mt-6"
+              className="w-full bg-yellow-500 hover:bg-yellow-600 disabled:bg-yellow-400 text-black font-semibold py-2.5 rounded-lg transition duration-200 mt-6"
             >
               {loading ? 'Creating account...' : 'Create Account'}
             </button>
           </form>
 
-          <div className="mt-6 pt-6 border-t border-slate-200">
-            <p className="text-center text-slate-600 text-sm">
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <p className="text-center text-gray-600 text-sm">
               Already have an account?{' '}
-              <Link to="/signin" className="text-blue-600 hover:text-blue-700 font-semibold">
+              <Link to="/signin" className="text-yellow-600 hover:text-yellow-700 font-semibold">
                 Sign In
               </Link>
             </p>
           </div>
         </div>
 
-        <p className="text-center text-slate-400 text-xs mt-6">
+        <p className="text-center text-gray-400 text-xs mt-6">
           By signing up, you agree to our Terms of Service and Privacy Policy
         </p>
       </div>
