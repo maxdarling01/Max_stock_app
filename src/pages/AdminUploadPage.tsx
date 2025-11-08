@@ -2,7 +2,30 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { Upload, Loader2, CheckCircle, X } from 'lucide-react';
+import { Upload, Loader2, CheckCircle, X, AlertCircle } from 'lucide-react';
+
+const CATEGORIES = ['Luxury Lifestyle', 'Boat Lifestyle', 'Supercars', 'Watches', 'Nature'];
+
+const CATEGORY_KEYWORDS: Record<string, string> = {
+  'Boat Lifestyle': 'Boat,Yacht,Sailing',
+  'Supercars': 'Bugatti,Supercar,Ferrari,Lamborghini,Porsche,McLaren,Pagani,Koenigsegg,Rolls-Royce,Corvette,Audi,Aston Martin,Mercedes',
+  'Watches': 'Watch,Rolex,Timepiece',
+  'Nature': 'Nature',
+};
+
+function detectCategoriesFromFilename(filename: string): string[] {
+  const nameWithoutExtension = filename.substring(0, filename.lastIndexOf('.')).toLowerCase();
+  const detected: string[] = [];
+
+  for (const [category, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
+    const keywordList = keywords.split(',').map(k => k.trim().toLowerCase());
+    if (keywordList.some(keyword => nameWithoutExtension.includes(keyword))) {
+      detected.push(category);
+    }
+  }
+
+  return detected.length > 0 ? detected : ['Luxury Lifestyle'];
+}
 
 function extractTags(filename: string): string[] {
   const nameWithoutExtension = filename.substring(0, filename.lastIndexOf('.'));
@@ -25,6 +48,11 @@ export default function AdminUploadPage() {
   const [newTag, setNewTag] = useState('');
   const [error, setError] = useState('');
   const [dragActive, setDragActive] = useState(false);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(['Luxury Lifestyle']);
+  const [tagUpdateMessage, setTagUpdateMessage] = useState('');
+  const [categoryUpdateMessage, setCategoryUpdateMessage] = useState('');
+  const [tagUpdateError, setTagUpdateError] = useState('');
+  const [categoryUpdateError, setCategoryUpdateError] = useState('');
 
   useEffect(() => {
     if (!user) {
@@ -65,6 +93,8 @@ export default function AdminUploadPage() {
 
     try {
       const extractedTags = extractTags(file.name);
+      const detectedCategories = detectCategoriesFromFilename(file.name);
+      setSelectedCategories(detectedCategories);
 
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-r2-upload-url`,
@@ -136,7 +166,7 @@ export default function AdminUploadPage() {
           type: 'video',
           resolution: 'HD',
           orientation: 'landscape',
-          category: 'Lifestyle',
+          category: detectedCategories.join(','),
           tags: extractedTags,
           file_size: `${fileSizeMB} MB`,
           formats: [extension],
@@ -191,6 +221,8 @@ export default function AdminUploadPage() {
   };
 
   const handleUpdateTags = async () => {
+    setTagUpdateMessage('');
+    setTagUpdateError('');
     try {
       const { error: updateError } = await supabase
         .from('assets')
@@ -199,9 +231,30 @@ export default function AdminUploadPage() {
 
       if (updateError) throw updateError;
 
-      alert('Tags updated successfully!');
+      setTagUpdateMessage('Tags updated successfully!');
+      setTimeout(() => setTagUpdateMessage(''), 3000);
     } catch (err) {
-      alert('Failed to update tags');
+      const errorMsg = err instanceof Error ? err.message : 'Failed to update tags';
+      setTagUpdateError(errorMsg);
+    }
+  };
+
+  const handleUpdateCategories = async () => {
+    setCategoryUpdateMessage('');
+    setCategoryUpdateError('');
+    try {
+      const { error: updateError } = await supabase
+        .from('assets')
+        .update({ category: selectedCategories.join(',') })
+        .eq('id', uploadedAssetId);
+
+      if (updateError) throw updateError;
+
+      setCategoryUpdateMessage('Categories updated successfully!');
+      setTimeout(() => setCategoryUpdateMessage(''), 3000);
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to update categories';
+      setCategoryUpdateError(errorMsg);
     }
   };
 
@@ -213,6 +266,11 @@ export default function AdminUploadPage() {
     setNewTag('');
     setError('');
     setUploadProgress(0);
+    setSelectedCategories(['Luxury Lifestyle']);
+    setTagUpdateMessage('');
+    setTagUpdateError('');
+    setCategoryUpdateMessage('');
+    setCategoryUpdateError('');
   };
 
   return (
@@ -327,6 +385,80 @@ export default function AdminUploadPage() {
               >
                 Update Tags
               </button>
+              {tagUpdateMessage && (
+                <div className="mt-2 p-2 bg-green-900 border border-green-700 rounded text-green-300 text-sm">
+                  {tagUpdateMessage}
+                </div>
+              )}
+              {tagUpdateError && (
+                <div className="mt-2 p-2 bg-red-900 border border-red-700 rounded text-red-300 text-sm flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                  <span>{tagUpdateError}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="w-full mb-6 border-t border-gray-700 pt-6">
+              <label className="block text-white font-semibold mb-3">Video Categories:</label>
+              <div className="flex flex-wrap gap-2 mb-4">
+                {selectedCategories.map((category) => (
+                  <span
+                    key={category}
+                    className="px-3 py-1 rounded-full text-sm flex items-center gap-2"
+                    style={{ backgroundColor: '#d4af37', color: '#000' }}
+                  >
+                    {category}
+                    <X
+                      className="w-4 h-4 cursor-pointer"
+                      onClick={() =>
+                        setSelectedCategories(
+                          selectedCategories.filter((c) => c !== category)
+                        )
+                      }
+                    />
+                  </span>
+                ))}
+              </div>
+              <div className="mb-4">
+                {CATEGORIES.map((category) => (
+                  <label key={category} className="flex items-center mb-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={selectedCategories.includes(category)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedCategories([...selectedCategories, category]);
+                        } else {
+                          setSelectedCategories(
+                            selectedCategories.filter((c) => c !== category)
+                          );
+                        }
+                      }}
+                      className="w-4 h-4 rounded"
+                      style={{ accentColor: '#d4af37' }}
+                    />
+                    <span className="ml-2 text-white text-sm">{category}</span>
+                  </label>
+                ))}
+              </div>
+              <button
+                onClick={handleUpdateCategories}
+                className="px-6 py-2 rounded font-semibold"
+                style={{ backgroundColor: '#d4af37', color: '#000' }}
+              >
+                Update Categories
+              </button>
+              {categoryUpdateMessage && (
+                <div className="mt-2 p-2 bg-green-900 border border-green-700 rounded text-green-300 text-sm">
+                  {categoryUpdateMessage}
+                </div>
+              )}
+              {categoryUpdateError && (
+                <div className="mt-2 p-2 bg-red-900 border border-red-700 rounded text-red-300 text-sm flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                  <span>{categoryUpdateError}</span>
+                </div>
+              )}
             </div>
 
             <button

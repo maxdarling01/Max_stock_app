@@ -3,13 +3,16 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import SearchBar from '../components/SearchBar';
 import AssetCard from '../components/AssetCard';
 import LoadingSkeleton from '../components/LoadingSkeleton';
-import { mockAssets, Asset } from '../data/mockAssets';
+import { Asset } from '../data/mockAssets';
+import { fetchAssets, categoryIncludes } from '../services/assetService';
 import { SlidersHorizontal } from 'lucide-react';
 
 type MediaType = 'all' | 'video' | 'photo';
 type Orientation = 'all' | 'landscape' | 'portrait' | 'square';
 type Resolution = 'all' | 'HD' | '4K';
 type SortOption = 'relevance' | 'downloads' | 'newest';
+
+const allCategories = ['Luxury Lifestyle', 'Boat Lifestyle', 'Supercars', 'Watches', 'Nature'];
 
 export default function SearchPage() {
   const [searchParams] = useSearchParams();
@@ -19,6 +22,7 @@ export default function SearchPage() {
 
   const [loading, setLoading] = useState(true);
   const [results, setResults] = useState<Asset[]>([]);
+  const [allAssets, setAllAssets] = useState<Asset[]>([]);
   const [mediaType, setMediaType] = useState<MediaType>('all');
   const [orientation, setOrientation] = useState<Orientation>('all');
   const [resolution, setResolution] = useState<Resolution>('all');
@@ -27,27 +31,37 @@ export default function SearchPage() {
   const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
-    if (query) {
+    const loadAssets = async () => {
+      const data = await fetchAssets();
+      setAllAssets(data);
+    };
+    loadAssets();
+  }, []);
+
+  useEffect(() => {
+    if (query || allAssets.length > 0) {
       performSearch();
     }
-  }, [query, isAI, mediaType, orientation, resolution, category, sortBy]);
+  }, [query, isAI, mediaType, orientation, resolution, category, sortBy, allAssets]);
 
   const performSearch = async () => {
     setLoading(true);
 
     await new Promise((resolve) => setTimeout(resolve, 1200));
 
-    let filtered = [...mockAssets];
+    let filtered = [...allAssets];
 
     const searchLower = query.toLowerCase();
-    filtered = filtered.filter((asset) => {
-      const titleMatch = asset.title.toLowerCase().includes(searchLower);
-      const descMatch = asset.description.toLowerCase().includes(searchLower);
-      const tagMatch = asset.tags.some((tag) => tag.toLowerCase().includes(searchLower));
-      const categoryMatch = asset.category.toLowerCase().includes(searchLower);
+    if (query) {
+      filtered = filtered.filter((asset) => {
+        const titleMatch = asset.title.toLowerCase().includes(searchLower);
+        const descMatch = asset.description.toLowerCase().includes(searchLower);
+        const tagMatch = asset.tags.some((tag) => tag.toLowerCase().includes(searchLower));
+        const categoryMatch = asset.category.toLowerCase().includes(searchLower);
 
-      return titleMatch || descMatch || tagMatch || categoryMatch;
-    });
+        return titleMatch || descMatch || tagMatch || categoryMatch;
+      });
+    }
 
     if (mediaType !== 'all') {
       filtered = filtered.filter((asset) => asset.type === mediaType);
@@ -62,7 +76,7 @@ export default function SearchPage() {
     }
 
     if (category !== 'all') {
-      filtered = filtered.filter((asset) => asset.category === category);
+      filtered = filtered.filter((asset) => categoryIncludes(asset.category, category));
     }
 
     if (sortBy === 'downloads') {
@@ -86,7 +100,7 @@ export default function SearchPage() {
     return 'Good Match';
   };
 
-  const categories = ['all', 'Nature', 'Business', 'Lifestyle', 'Technology', 'Food', 'Travel'];
+  const categories = ['all', ...allCategories];
 
   return (
     <div>

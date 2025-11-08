@@ -1,6 +1,7 @@
 import { Film, Image, Download } from 'lucide-react';
 import { Asset } from '../data/mockAssets';
 import { Link } from 'react-router-dom';
+import { getCategoryArray } from '../services/assetService';
 
 interface AssetCardProps {
   asset: Asset;
@@ -66,6 +67,20 @@ export default function AssetCard({ asset, relevanceBadge }: AssetCardProps) {
             {asset.resolution}
           </span>
         </div>
+
+        {asset.category && (
+          <div className="flex flex-wrap gap-1 mb-3">
+            {getCategoryArray(asset.category).map((cat) => (
+              <span
+                key={cat}
+                className="px-2 py-1 rounded-full text-xs font-medium"
+                style={{ backgroundColor: '#d4af37', color: '#000' }}
+              >
+                {cat}
+              </span>
+            ))}
+          </div>
+        )}
 
         <div className="flex items-center justify-between text-sm text-gray-500">
           <span className="flex items-center space-x-1">

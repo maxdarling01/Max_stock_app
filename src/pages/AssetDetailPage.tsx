@@ -1,7 +1,8 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Film, Download, ChevronRight, Play } from 'lucide-react';
-import { mockAssets } from '../data/mockAssets';
+import { Asset } from '../data/mockAssets';
+import { fetchAssets, categoryIncludes, getCategoryArray } from '../services/assetService';
 import AssetCard from '../components/AssetCard';
 import DownloadModal from '../components/DownloadModal';
 
@@ -9,8 +10,41 @@ export default function AssetDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [showDownloadModal, setShowDownloadModal] = useState(false);
+  const [asset, setAsset] = useState<Asset | null>(null);
+  const [similarAssets, setSimilarAssets] = useState<Asset[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const asset = mockAssets.find((a) => a.id === id);
+  useEffect(() => {
+    const loadAsset = async () => {
+      const allAssets = await fetchAssets();
+      const found = allAssets.find((a) => a.id === id);
+      setAsset(found || null);
+
+      if (found) {
+        const similar = allAssets
+          .filter((a) => {
+            const assetCats = getCategoryArray(a.category);
+            const foundCats = getCategoryArray(found.category);
+            return (
+              assetCats.some((cat) => foundCats.includes(cat)) &&
+              a.id !== found.id
+            );
+          })
+          .slice(0, 6);
+        setSimilarAssets(similar);
+      }
+      setLoading(false);
+    };
+    loadAsset();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
+        <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-yellow-500 border-t-transparent"></div>
+      </div>
+    );
+  }
 
   if (!asset) {
     return (
@@ -22,10 +56,6 @@ export default function AssetDetailPage() {
       </div>
     );
   }
-
-  const similarAssets = mockAssets
-    .filter((a) => a.category === asset.category && a.id !== asset.id)
-    .slice(0, 6);
 
   return (
     <>
@@ -109,6 +139,21 @@ export default function AssetDetailPage() {
                   <span className="font-semibold text-gray-900 capitalize">
                     {asset.orientation}
                   </span>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <h3 className="text-sm font-semibold text-gray-900 mb-2">Categories</h3>
+                <div className="flex flex-wrap gap-2">
+                  {getCategoryArray(asset.category).map((cat) => (
+                    <span
+                      key={cat}
+                      className="px-3 py-1 rounded-full text-sm font-medium"
+                      style={{ backgroundColor: '#d4af37', color: '#000' }}
+                    >
+                      {cat}
+                    </span>
+                  ))}
                 </div>
               </div>
 

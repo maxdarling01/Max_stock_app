@@ -1,22 +1,34 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SearchBar from '../components/SearchBar';
 import AssetCard from '../components/AssetCard';
-import { mockAssets } from '../data/mockAssets';
+import { Asset } from '../data/mockAssets';
+import { fetchAssets, categoryIncludes } from '../services/assetService';
 
-const categories = ['Nature', 'Business', 'Lifestyle', 'Technology', 'Food', 'Travel'];
+const categories = ['Luxury Lifestyle', 'Boat Lifestyle', 'Supercars', 'Watches', 'Nature'];
 
 export default function HomePage() {
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [assets, setAssets] = useState<Asset[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadAssets = async () => {
+      const data = await fetchAssets();
+      setAssets(data);
+      setLoading(false);
+    };
+    loadAssets();
+  }, []);
 
   const handleSearch = (query: string, isAI: boolean) => {
     navigate(`/search?q=${encodeURIComponent(query)}&ai=${isAI}`);
   };
 
   const featuredAssets = selectedCategory
-    ? mockAssets.filter((asset) => asset.category === selectedCategory).slice(0, 12)
-    : mockAssets.slice(0, 12);
+    ? assets.filter((asset) => categoryIncludes(asset.category, selectedCategory)).slice(0, 12)
+    : assets.slice(0, 12);
 
   return (
     <div>

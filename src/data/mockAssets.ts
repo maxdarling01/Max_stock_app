@@ -8,7 +8,7 @@ export interface Asset {
   duration?: number;
   resolution: '4K' | 'HD';
   orientation: 'landscape' | 'portrait' | 'square';
-  category: 'Nature' | 'Business' | 'Lifestyle' | 'Technology' | 'Food' | 'Travel';
+  category: string;
   tags: string[];
   download_count: number;
   file_size: string;
