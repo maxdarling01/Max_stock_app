@@ -32,7 +32,7 @@ export default function AdminUploadPage() {
       return;
     }
 
-    if (user.email !== 'Maxdarling84@gmail.com') {
+    if (user.email !== 'maxdarling84@gmail.com') {
       return;
     }
   }, [user, navigate]);
@@ -41,7 +41,7 @@ export default function AdminUploadPage() {
     return null;
   }
 
-  if (user.email !== 'Maxdarling84@gmail.com') {
+  if (user.email !== 'maxdarling84@gmail.com') {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center">

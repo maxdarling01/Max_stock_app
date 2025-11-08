@@ -4,7 +4,7 @@ This document explains how to configure Cloudflare R2 for video uploads in the M
 
 ## Overview
 
-The admin upload feature allows the admin user (Maxdarling84@gmail.com) to upload videos directly to Cloudflare R2 storage. Videos are stored in R2 and immediately available for users to browse and download.
+The admin upload feature allows the admin user (maxdarling84@gmail.com) to upload videos directly to Cloudflare R2 storage. Videos are stored in R2 and immediately available for users to browse and download.
 
 ## Prerequisites
 
@@ -72,7 +72,7 @@ The edge function `get-r2-upload-url` should already be deployed. To verify:
 
 ## Step 6: Test the Upload
 
-1. Sign in as admin (Maxdarling84@gmail.com)
+1. Sign in as admin (maxdarling84@gmail.com)
 2. Click "Admin Upload" in the navigation
 3. Upload a test video file
 4. Video should upload to R2 and appear in the browse page
@@ -103,7 +103,7 @@ Tags are automatically extracted from the filename:
 
 ## Security Notes
 
-1. Only the admin email (Maxdarling84@gmail.com) can access the upload page
+1. Only the admin email (maxdarling84@gmail.com) can access the upload page
 2. Admin must be authenticated to upload
 3. Database policies ensure only admin can insert/update assets
 4. R2 bucket should have CORS configured if needed for direct uploads

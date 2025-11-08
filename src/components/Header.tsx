@@ -47,7 +47,7 @@ export default function Header() {
                 >
                   License
                 </Link>
-                {user.email === 'Maxdarling84@gmail.com' && (
+                {user.email === 'maxdarling84@gmail.com' && (
                   <Link
                     to="/admin/upload"
                     className={`${
@@ -139,7 +139,7 @@ export default function Header() {
                 >
                   License
                 </Link>
-                {user.email === 'Maxdarling84@gmail.com' && (
+                {user.email === 'maxdarling84@gmail.com' && (
                   <Link
                     to="/admin/upload"
                     className={`${
