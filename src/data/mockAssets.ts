@@ -4,6 +4,7 @@ export interface Asset {
   description: string;
   type: 'video' | 'photo';
   thumbnail_url: string;
+  file_url?: string;
   duration?: number;
   resolution: '4K' | 'HD';
   orientation: 'landscape' | 'portrait' | 'square';

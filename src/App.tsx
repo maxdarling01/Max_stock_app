@@ -9,6 +9,7 @@ import LicensePage from './pages/LicensePage';
 import LandingPage from './pages/LandingPage';
 import SignUpPage from './pages/SignUpPage';
 import SignInPage from './pages/SignInPage';
+import AdminUploadPage from './pages/AdminUploadPage';
 
 function AppContent() {
   const { user, loading } = useAuth();
@@ -34,6 +35,7 @@ function AppContent() {
           <Route path="/asset/:id" element={<AssetDetailPage />} />
           <Route path="/license" element={<LicensePage />} />
           <Route path="/home" element={<HomePage />} />
+          <Route path="/admin/upload" element={<AdminUploadPage />} />
         </Routes>
       </main>
       <Footer />

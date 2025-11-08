@@ -29,6 +29,9 @@ export default function DownloadModal({ asset, onClose }: DownloadModalProps) {
   const formats = asset.type === 'video' ? videoFormats : photoFormats;
 
   const handleDownload = () => {
+    if (asset.file_url) {
+      window.open(asset.file_url, '_blank');
+    }
     setDownloadSuccess(true);
     setTimeout(() => {
       onClose();

@@ -47,6 +47,18 @@ export default function Header() {
                 >
                   License
                 </Link>
+                {user.email === 'Maxdarling84@gmail.com' && (
+                  <Link
+                    to="/admin/upload"
+                    className={`${
+                      isActive('/admin/upload')
+                        ? 'text-blue-600 font-semibold'
+                        : 'text-gray-600 hover:text-blue-600'
+                    } transition-colors`}
+                  >
+                    Admin Upload
+                  </Link>
+                )}
               </>
             )}
             <a
@@ -127,6 +139,19 @@ export default function Header() {
                 >
                   License
                 </Link>
+                {user.email === 'Maxdarling84@gmail.com' && (
+                  <Link
+                    to="/admin/upload"
+                    className={`${
+                      isActive('/admin/upload')
+                        ? 'text-blue-600 font-semibold'
+                        : 'text-gray-600'
+                    } py-2 text-lg`}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Admin Upload
+                  </Link>
+                )}
               </>
             )}
             <a
