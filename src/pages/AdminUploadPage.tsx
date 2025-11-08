@@ -145,14 +145,19 @@ export default function AdminUploadPage() {
         .select()
         .single();
 
-      if (insertError) throw insertError;
+      if (insertError) {
+        console.error('Database insert error:', insertError);
+        throw new Error(`Failed to save video to database: ${insertError.message}`);
+      }
 
       setFileUrl(r2FileUrl);
       setUploadedAssetId(insertData.id);
       setTags(extractedTags);
       setUploadSuccess(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Upload failed');
+      const errorMessage = err instanceof Error ? err.message : 'Upload failed';
+      console.error('Upload error:', err);
+      setError(errorMessage);
     } finally {
       setUploading(false);
     }
