@@ -82,7 +82,8 @@ export default function AdminUploadPage() {
       );
 
       if (!response.ok) {
-        throw new Error('Failed to get upload URL');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Failed to get upload URL (${response.status})`);
       }
 
       const { uploadUrl, fileUrl: r2FileUrl } = await response.json();
@@ -101,12 +102,16 @@ export default function AdminUploadPage() {
           if (xhr.status === 200) {
             resolve();
           } else {
-            reject(new Error('Upload failed'));
+            reject(new Error(`Upload failed with status ${xhr.status}`));
           }
         });
 
         xhr.addEventListener('error', () => {
-          reject(new Error('Upload failed'));
+          reject(new Error('Upload failed - network error or CORS issue'));
+        });
+
+        xhr.addEventListener('abort', () => {
+          reject(new Error('Upload was cancelled'));
         });
 
         xhr.open('PUT', uploadUrl);
