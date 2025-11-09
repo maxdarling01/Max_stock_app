@@ -80,6 +80,35 @@ export default function AdminUploadPage() {
     );
   }
 
+  const getVideoMetadata = (file: File): Promise<{ duration: number; width: number; height: number }> => {
+    return new Promise((resolve, reject) => {
+      const video = document.createElement('video');
+      video.preload = 'metadata';
+
+      video.onloadedmetadata = () => {
+        window.URL.revokeObjectURL(video.src);
+        resolve({
+          duration: Math.round(video.duration),
+          width: video.videoWidth,
+          height: video.videoHeight
+        });
+      };
+
+      video.onerror = () => {
+        reject(new Error('Failed to load video metadata'));
+      };
+
+      video.src = URL.createObjectURL(file);
+    });
+  };
+
+  const detectOrientation = (width: number, height: number): 'landscape' | 'portrait' | 'square' => {
+    const aspectRatio = width / height;
+    if (aspectRatio > 1.1) return 'landscape';
+    if (aspectRatio < 0.9) return 'portrait';
+    return 'square';
+  };
+
   const handleFileUpload = async (file: File) => {
     const extension = file.name.split('.').pop()?.toLowerCase();
     if (!['mp4', 'mov', 'webm'].includes(extension || '')) {
@@ -95,6 +124,10 @@ export default function AdminUploadPage() {
       const extractedTags = extractTags(file.name);
       const detectedCategories = detectCategoriesFromFilename(file.name);
       setSelectedCategories(detectedCategories);
+
+      const { duration, width, height } = await getVideoMetadata(file);
+      const orientation = detectOrientation(width, height);
+      const resolution = height >= 2160 ? '4K' : 'HD';
 
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-r2-upload-url`,
@@ -164,13 +197,14 @@ export default function AdminUploadPage() {
           file_url: r2FileUrl,
           thumbnail_url: r2FileUrl,
           type: 'video',
-          resolution: 'HD',
-          orientation: 'landscape',
+          resolution,
+          orientation,
           category: detectedCategories.join(','),
           tags: extractedTags,
           file_size: `${fileSizeMB} MB`,
           formats: [extension],
-          download_count: 0
+          download_count: 0,
+          duration
         })
         .select()
         .single();
