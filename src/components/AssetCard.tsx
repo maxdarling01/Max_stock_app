@@ -2,6 +2,7 @@ import { Film, Image, Download } from 'lucide-react';
 import { Asset } from '../data/mockAssets';
 import { Link } from 'react-router-dom';
 import { getCategoryArray } from '../services/assetService';
+import { useState, useRef } from 'react';
 
 interface AssetCardProps {
   asset: Asset;
@@ -9,28 +10,79 @@ interface AssetCardProps {
 }
 
 export default function AssetCard({ asset, relevanceBadge }: AssetCardProps) {
+  const [isHovering, setIsHovering] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
   const badgeColors = {
     'Perfect Match': 'bg-yellow-500 text-black',
     'Great Match': 'bg-yellow-400 text-black',
     'Good Match': 'bg-gray-100 text-gray-800'
   };
 
+  const handleMouseEnter = () => {
+    setIsHovering(true);
+    if (videoRef.current && asset.type === 'video' && asset.file_url) {
+      videoRef.current.play().catch(() => {
+      });
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovering(false);
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    }
+  };
+
   return (
     <Link
       to={`/asset/${asset.id}`}
       className="group bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <div className="relative aspect-video overflow-hidden bg-gray-200">
-        <img
-          src={asset.thumbnail_url}
-          alt={asset.title}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-        />
+        {asset.type === 'video' && asset.file_url ? (
+          <>
+            <video
+              ref={videoRef}
+              src={asset.file_url}
+              className={`w-full h-full object-cover transition-opacity duration-300 ${
+                isHovering ? 'opacity-100' : 'opacity-0'
+              }`}
+              muted
+              loop
+              playsInline
+              preload="metadata"
+            />
+            <video
+              src={asset.file_url}
+              className={`w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ${
+                isHovering ? 'opacity-0' : 'opacity-100'
+              }`}
+              muted
+              preload="metadata"
+            />
+          </>
+        ) : (
+          <img
+            src={asset.thumbnail_url}
+            alt={asset.title}
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+          />
+        )}
         {asset.type === 'video' && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-20 group-hover:bg-opacity-30 transition-all">
-            <div className="w-16 h-16 rounded-full bg-white bg-opacity-90 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <Film className="w-8 h-8 text-yellow-500" />
-            </div>
+          <div
+            className={`absolute inset-0 flex items-center justify-center bg-black transition-all ${
+              isHovering ? 'bg-opacity-0' : 'bg-opacity-20 group-hover:bg-opacity-30'
+            }`}
+          >
+            {!isHovering && (
+              <div className="w-16 h-16 rounded-full bg-white bg-opacity-90 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Film className="w-8 h-8 text-yellow-500" />
+              </div>
+            )}
           </div>
         )}
         {relevanceBadge && (
