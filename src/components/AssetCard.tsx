@@ -46,22 +46,20 @@ export default function AssetCard({ asset, relevanceBadge }: AssetCardProps) {
         {asset.type === 'video' && asset.file_url ? (
           <>
             <video
+              src={asset.file_url}
+              className="absolute inset-0 w-full h-full object-cover"
+              muted
+              preload="metadata"
+            />
+            <video
               ref={videoRef}
               src={asset.file_url}
-              className={`w-full h-full object-cover transition-opacity duration-300 ${
+              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
                 isHovering ? 'opacity-100' : 'opacity-0'
               }`}
               muted
               loop
               playsInline
-              preload="metadata"
-            />
-            <video
-              src={asset.file_url}
-              className={`w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ${
-                isHovering ? 'opacity-0' : 'opacity-100'
-              }`}
-              muted
               preload="metadata"
             />
           </>

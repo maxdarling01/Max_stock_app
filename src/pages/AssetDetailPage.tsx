@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Film, Download, ChevronRight, Play } from 'lucide-react';
 import { Asset } from '../data/mockAssets';
 import { fetchAssets, categoryIncludes, getCategoryArray } from '../services/assetService';
@@ -13,6 +13,8 @@ export default function AssetDetailPage() {
   const [asset, setAsset] = useState<Asset | null>(null);
   const [similarAssets, setSimilarAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isHoveringVideo, setIsHoveringVideo] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const loadAsset = async () => {
@@ -74,17 +76,60 @@ export default function AssetDetailPage() {
 
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
-            <div className="bg-gray-900 rounded-xl overflow-hidden aspect-video relative group">
-              <img
-                src={asset.thumbnail_url}
-                alt={asset.title}
-                className="w-full h-full object-cover"
-              />
+            <div
+              className="bg-gray-900 rounded-xl overflow-hidden aspect-video relative group"
+              onMouseEnter={() => {
+                setIsHoveringVideo(true);
+                if (videoRef.current && asset.type === 'video' && asset.file_url) {
+                  videoRef.current.play().catch(() => {});
+                }
+              }}
+              onMouseLeave={() => {
+                setIsHoveringVideo(false);
+                if (videoRef.current) {
+                  videoRef.current.pause();
+                  videoRef.current.currentTime = 0;
+                }
+              }}
+            >
+              {asset.type === 'video' && asset.file_url ? (
+                <>
+                  <video
+                    src={asset.file_url}
+                    className="absolute inset-0 w-full h-full object-cover"
+                    muted
+                    preload="metadata"
+                  />
+                  <video
+                    ref={videoRef}
+                    src={asset.file_url}
+                    className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
+                      isHoveringVideo ? 'opacity-100' : 'opacity-0'
+                    }`}
+                    muted
+                    loop
+                    playsInline
+                    preload="metadata"
+                  />
+                </>
+              ) : (
+                <img
+                  src={asset.thumbnail_url}
+                  alt={asset.title}
+                  className="w-full h-full object-cover"
+                />
+              )}
               {asset.type === 'video' && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30">
-                  <div className="w-20 h-20 rounded-full bg-white bg-opacity-90 flex items-center justify-center group-hover:scale-110 transition-transform cursor-pointer">
-                    <Play className="w-10 h-10 text-yellow-500 ml-1" />
-                  </div>
+                <div
+                  className={`absolute inset-0 flex items-center justify-center bg-black transition-all ${
+                    isHoveringVideo ? 'bg-opacity-0' : 'bg-opacity-30'
+                  }`}
+                >
+                  {!isHoveringVideo && (
+                    <div className="w-20 h-20 rounded-full bg-white bg-opacity-90 flex items-center justify-center group-hover:scale-110 transition-transform cursor-pointer">
+                      <Play className="w-10 h-10 text-yellow-500 ml-1" />
+                    </div>
+                  )}
                 </div>
               )}
             </div>
