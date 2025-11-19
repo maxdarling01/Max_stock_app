@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { Upload, Loader2, CheckCircle, X, AlertCircle } from 'lucide-react';
+import { Upload, Loader2, CheckCircle, X, AlertCircle, Sparkles } from 'lucide-react';
+import { generateEmbedding, combinedSearchText } from '../services/embeddingService';
 
 const CATEGORIES = ['Luxury Lifestyle', 'Boat Lifestyle', 'Supercars', 'Watches', 'Nature'];
 
@@ -53,6 +54,8 @@ export default function AdminUploadPage() {
   const [categoryUpdateMessage, setCategoryUpdateMessage] = useState('');
   const [tagUpdateError, setTagUpdateError] = useState('');
   const [categoryUpdateError, setCategoryUpdateError] = useState('');
+  const [embeddingMessage, setEmbeddingMessage] = useState('');
+  const [embeddingWarning, setEmbeddingWarning] = useState('');
 
   useEffect(() => {
     if (!user) {
@@ -189,6 +192,29 @@ export default function AdminUploadPage() {
 
       const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
 
+      setEmbeddingMessage('Generating AI search data...');
+      let embedding: number[] | null = null;
+
+      try {
+        const searchText = combinedSearchText(
+          extractedTags,
+          detectedCategories.join(' ')
+        );
+        embedding = await generateEmbedding(searchText);
+
+        if (embedding) {
+          setEmbeddingMessage('AI search data generated successfully!');
+        } else {
+          setEmbeddingWarning('Could not generate AI search data. Video will be searchable with keywords only.');
+          console.warn('Embedding generation returned null, continuing without embedding');
+        }
+      } catch (embeddingError) {
+        setEmbeddingWarning('Could not generate AI search data. Video will be searchable with keywords only.');
+        console.error('Embedding generation error:', embeddingError);
+      }
+
+      setTimeout(() => setEmbeddingMessage(''), 3000);
+
       const { data: insertData, error: insertError } = await supabase
         .from('assets')
         .insert({
@@ -204,7 +230,8 @@ export default function AdminUploadPage() {
           file_size: `${fileSizeMB} MB`,
           formats: [extension],
           download_count: 0,
-          duration
+          duration,
+          embedding: embedding || null
         })
         .select()
         .single();
@@ -305,6 +332,8 @@ export default function AdminUploadPage() {
     setTagUpdateError('');
     setCategoryUpdateMessage('');
     setCategoryUpdateError('');
+    setEmbeddingMessage('');
+    setEmbeddingWarning('');
   };
 
   return (
@@ -379,6 +408,20 @@ export default function AdminUploadPage() {
           <div className="flex flex-col items-center">
             <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
             <h2 className="text-2xl text-white font-semibold mb-6">Upload Complete!</h2>
+
+            {embeddingMessage && (
+              <div className="mb-4 p-3 bg-green-900 border border-green-700 rounded text-green-300 text-sm flex items-center gap-2 w-full max-w-md justify-center">
+                <Sparkles className="w-4 h-4 flex-shrink-0" />
+                {embeddingMessage}
+              </div>
+            )}
+
+            {embeddingWarning && (
+              <div className="mb-4 p-3 bg-yellow-900 border border-yellow-700 rounded text-yellow-300 text-sm flex items-center gap-2 w-full max-w-md justify-center">
+                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                {embeddingWarning}
+              </div>
+            )}
 
             <video src={fileUrl} controls className="w-full rounded-lg mb-6" />
 

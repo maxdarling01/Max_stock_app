@@ -5,7 +5,9 @@ import AssetCard from '../components/AssetCard';
 import LoadingSkeleton from '../components/LoadingSkeleton';
 import { Asset } from '../data/mockAssets';
 import { fetchAssets, categoryIncludes } from '../services/assetService';
-import { SlidersHorizontal } from 'lucide-react';
+import { generateEmbedding } from '../services/embeddingService';
+import { supabase } from '../lib/supabase';
+import { SlidersHorizontal, AlertCircle } from 'lucide-react';
 
 type MediaType = 'all' | 'video' | 'photo';
 type Orientation = 'all' | 'landscape' | 'portrait' | 'square';
@@ -14,6 +16,10 @@ type SortOption = 'relevance' | 'downloads' | 'newest';
 
 const allCategories = ['Luxury Lifestyle', 'Boat Lifestyle', 'Supercars', 'Watches', 'Nature'];
 
+interface AssetWithSimilarity extends Asset {
+  similarity?: number;
+}
+
 export default function SearchPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -21,7 +27,7 @@ export default function SearchPage() {
   const isAI = searchParams.get('ai') === 'true';
 
   const [loading, setLoading] = useState(true);
-  const [results, setResults] = useState<Asset[]>([]);
+  const [results, setResults] = useState<AssetWithSimilarity[]>([]);
   const [allAssets, setAllAssets] = useState<Asset[]>([]);
   const [mediaType, setMediaType] = useState<MediaType>('all');
   const [orientation, setOrientation] = useState<Orientation>('all');
@@ -29,6 +35,7 @@ export default function SearchPage() {
   const [category, setCategory] = useState<string>('all');
   const [sortBy, setSortBy] = useState<SortOption>('relevance');
   const [showFilters, setShowFilters] = useState(false);
+  const [aiSearchFailed, setAiSearchFailed] = useState(false);
 
   useEffect(() => {
     const loadAssets = async () => {
@@ -46,57 +53,101 @@ export default function SearchPage() {
 
   const performSearch = async () => {
     setLoading(true);
+    setAiSearchFailed(false);
 
-    await new Promise((resolve) => setTimeout(resolve, 1200));
+    let filtered: AssetWithSimilarity[] = [...allAssets];
 
-    let filtered = [...allAssets];
+    if (isAI && query) {
+      try {
+        const embedding = await generateEmbedding(query);
 
-    const searchLower = query.toLowerCase();
-    if (query) {
-      filtered = filtered.filter((asset) => {
-        const titleMatch = asset.title.toLowerCase().includes(searchLower);
-        const descMatch = asset.description.toLowerCase().includes(searchLower);
-        const tagMatch = asset.tags.some((tag) => tag.toLowerCase().includes(searchLower));
-        const categoryMatch = asset.category.toLowerCase().includes(searchLower);
+        if (embedding) {
+          const { data: semanticResults, error } = await supabase.rpc('match_assets', {
+            query_embedding: embedding,
+            match_threshold: 0.7,
+            match_count: 50,
+          });
 
-        return titleMatch || descMatch || tagMatch || categoryMatch;
-      });
+          if (error) {
+            console.error('Semantic search error:', error);
+            setAiSearchFailed(true);
+            filtered = performKeywordSearch(query, filtered);
+          } else if (semanticResults && semanticResults.length > 0) {
+            filtered = semanticResults as AssetWithSimilarity[];
+          } else {
+            await new Promise((resolve) => setTimeout(resolve, 300));
+            filtered = performKeywordSearch(query, filtered);
+          }
+        } else {
+          console.warn('Failed to generate embedding, falling back to keyword search');
+          setAiSearchFailed(true);
+          filtered = performKeywordSearch(query, filtered);
+        }
+      } catch (err) {
+        console.error('AI search exception:', err);
+        setAiSearchFailed(true);
+        filtered = performKeywordSearch(query, filtered);
+      }
+    } else if (query) {
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      filtered = performKeywordSearch(query, filtered);
     }
 
+    applyFilters(filtered);
+    setLoading(false);
+  };
+
+  const performKeywordSearch = (searchQuery: string, assets: AssetWithSimilarity[]): AssetWithSimilarity[] => {
+    const searchLower = searchQuery.toLowerCase();
+    return assets.filter((asset) => {
+      const titleMatch = asset.title.toLowerCase().includes(searchLower);
+      const descMatch = asset.description.toLowerCase().includes(searchLower);
+      const tagMatch = asset.tags.some((tag) => tag.toLowerCase().includes(searchLower));
+      const categoryMatch = asset.category.toLowerCase().includes(searchLower);
+
+      return titleMatch || descMatch || tagMatch || categoryMatch;
+    });
+  };
+
+  const applyFilters = (filtered: AssetWithSimilarity[]) => {
+    let result = filtered;
+
     if (mediaType !== 'all') {
-      filtered = filtered.filter((asset) => asset.type === mediaType);
+      result = result.filter((asset) => asset.type === mediaType);
     }
 
     if (orientation !== 'all') {
-      filtered = filtered.filter((asset) => asset.orientation === orientation);
+      result = result.filter((asset) => asset.orientation === orientation);
     }
 
     if (resolution !== 'all') {
-      filtered = filtered.filter((asset) => asset.resolution === resolution);
+      result = result.filter((asset) => asset.resolution === resolution);
     }
 
     if (category !== 'all') {
-      filtered = filtered.filter((asset) => categoryIncludes(asset.category, category));
+      result = result.filter((asset) => categoryIncludes(asset.category, category));
     }
 
-    if (sortBy === 'downloads') {
-      filtered.sort((a, b) => b.download_count - a.download_count);
-    } else if (sortBy === 'newest') {
-      filtered.reverse();
+    if (!isAI) {
+      if (sortBy === 'downloads') {
+        result.sort((a, b) => b.download_count - a.download_count);
+      } else if (sortBy === 'newest') {
+        result.reverse();
+      }
     }
 
-    setResults(filtered);
-    setLoading(false);
+    setResults(result);
   };
 
   const handleSearch = (newQuery: string, newIsAI: boolean) => {
     navigate(`/search?q=${encodeURIComponent(newQuery)}&ai=${newIsAI}`);
   };
 
-  const getRelevanceBadge = (index: number) => {
-    if (!isAI) return undefined;
-    if (index < 3) return 'Perfect Match';
-    if (index < 8) return 'Great Match';
+  const getRelevanceBadge = (asset: AssetWithSimilarity) => {
+    if (!isAI || typeof asset.similarity !== 'number') return undefined;
+
+    if (asset.similarity >= 0.85) return 'Perfect Match';
+    if (asset.similarity >= 0.75) return 'Great Match';
     return 'Good Match';
   };
 
@@ -115,13 +166,23 @@ export default function SearchPage() {
           <div className="text-center py-8">
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-yellow-500 border-t-transparent"></div>
             <p className="mt-4 text-gray-600 font-medium">
-              {isAI ? 'AI is finding matches...' : 'Searching...'}
+              {isAI ? 'AI is finding your perfect matches...' : 'Searching...'}
             </p>
           </div>
         )}
 
         {!loading && (
           <>
+            {aiSearchFailed && (
+              <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-yellow-800 font-medium">AI search temporarily unavailable</p>
+                  <p className="text-yellow-700 text-sm">Using keyword search instead</p>
+                </div>
+              </div>
+            )}
+
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
               <h2 className="text-2xl font-bold text-gray-900">
                 Found {results.length} results {query && `for "${query}"`}
@@ -248,11 +309,12 @@ export default function SearchPage() {
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {results.map((asset, index) => (
+                    {results.map((asset) => (
                       <AssetCard
                         key={asset.id}
                         asset={asset}
-                        relevanceBadge={getRelevanceBadge(index)}
+                        relevanceBadge={getRelevanceBadge(asset)}
+                        similarity={asset.similarity}
                       />
                     ))}
                   </div>

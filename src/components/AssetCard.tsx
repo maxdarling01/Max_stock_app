@@ -7,9 +7,10 @@ import { useState, useRef } from 'react';
 interface AssetCardProps {
   asset: Asset;
   relevanceBadge?: 'Perfect Match' | 'Great Match' | 'Good Match';
+  similarity?: number;
 }
 
-export default function AssetCard({ asset, relevanceBadge }: AssetCardProps) {
+export default function AssetCard({ asset, relevanceBadge, similarity }: AssetCardProps) {
   const [isHovering, setIsHovering] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -86,6 +87,23 @@ export default function AssetCard({ asset, relevanceBadge }: AssetCardProps) {
         {relevanceBadge && (
           <div className={`absolute top-2 left-2 px-2 py-1 rounded-full text-xs font-semibold ${badgeColors[relevanceBadge]}`}>
             {relevanceBadge}
+          </div>
+        )}
+
+        {similarity !== undefined && (
+          <div className="absolute bottom-2 left-2 right-2">
+            <div className="bg-black bg-opacity-70 rounded px-2 py-1">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs text-white font-semibold">Match</span>
+                <span className="text-xs text-yellow-400 font-semibold">{Math.round(similarity * 100)}%</span>
+              </div>
+              <div className="w-full h-1 bg-gray-600 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-yellow-500 transition-all"
+                  style={{ width: `${similarity * 100}%` }}
+                />
+              </div>
+            </div>
           </div>
         )}
       </div>
