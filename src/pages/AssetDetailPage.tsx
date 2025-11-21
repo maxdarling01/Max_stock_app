@@ -78,7 +78,7 @@ export default function AssetDetailPage() {
           <div className="lg:col-span-2">
             <div
               className="bg-gray-900 rounded-xl overflow-hidden relative group w-full"
-              style={{ aspectRatio: 'auto' }}
+              style={{ maxHeight: '60vh' }}
               onMouseEnter={() => {
                 setIsHoveringVideo(true);
                 if (videoRef.current && asset.type === 'video' && asset.file_url) {
