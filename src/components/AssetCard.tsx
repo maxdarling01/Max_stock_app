@@ -48,14 +48,14 @@ export default function AssetCard({ asset, relevanceBadge, similarity }: AssetCa
           <>
             <video
               src={asset.file_url}
-              className="absolute inset-0 w-full h-full object-contain"
+              className="absolute inset-0 w-full h-full object-cover"
               muted
               preload="metadata"
             />
             <video
               ref={videoRef}
               src={asset.file_url}
-              className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${
+              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
                 isHovering ? 'opacity-100' : 'opacity-0'
               }`}
               muted

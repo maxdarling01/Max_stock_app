@@ -56,6 +56,9 @@ export default function AdminUploadPage() {
   const [categoryUpdateError, setCategoryUpdateError] = useState('');
   const [embeddingMessage, setEmbeddingMessage] = useState('');
   const [embeddingWarning, setEmbeddingWarning] = useState('');
+  const [downloadCount, setDownloadCount] = useState(0);
+  const [downloadCountUpdateMessage, setDownloadCountUpdateMessage] = useState('');
+  const [downloadCountUpdateError, setDownloadCountUpdateError] = useState('');
 
   useEffect(() => {
     if (!user) {
@@ -245,6 +248,7 @@ export default function AdminUploadPage() {
       setFileUrl(r2FileUrl);
       setUploadedAssetId(insertData.id);
       setTags(extractedTags);
+      setDownloadCount(0);
       setUploadSuccess(true);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Upload failed';
@@ -320,6 +324,25 @@ export default function AdminUploadPage() {
     }
   };
 
+  const handleUpdateDownloadCount = async () => {
+    setDownloadCountUpdateMessage('');
+    setDownloadCountUpdateError('');
+    try {
+      const { error: updateError } = await supabase
+        .from('assets')
+        .update({ download_count: downloadCount })
+        .eq('id', uploadedAssetId);
+
+      if (updateError) throw updateError;
+
+      setDownloadCountUpdateMessage('Download count updated!');
+      setTimeout(() => setDownloadCountUpdateMessage(''), 3000);
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to update download count';
+      setDownloadCountUpdateError(errorMsg);
+    }
+  };
+
   const handleReset = () => {
     setUploadSuccess(false);
     setFileUrl('');
@@ -335,6 +358,9 @@ export default function AdminUploadPage() {
     setCategoryUpdateError('');
     setEmbeddingMessage('');
     setEmbeddingWarning('');
+    setDownloadCount(0);
+    setDownloadCountUpdateMessage('');
+    setDownloadCountUpdateError('');
   };
 
   return (
@@ -535,6 +561,40 @@ export default function AdminUploadPage() {
                 <div className="mt-2 p-2 bg-red-900 border border-red-700 rounded text-red-300 text-sm flex items-start gap-2">
                   <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
                   <span>{categoryUpdateError}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="w-full mb-6 border-t border-gray-700 pt-6">
+              <label className="block text-white font-semibold mb-3">Download Count:</label>
+              <div className="mb-4">
+                <p className="text-gray-400 text-sm mb-2">Current count: {downloadCount}</p>
+                <input
+                  type="number"
+                  min="0"
+                  value={downloadCount}
+                  onChange={(e) => setDownloadCount(Math.max(0, parseInt(e.target.value) || 0))}
+                  placeholder="Enter download count"
+                  className="bg-gray-800 text-white border rounded px-3 py-2 w-full max-w-xs mb-2 focus:outline-none"
+                  style={{ borderColor: '#d4af37' }}
+                />
+              </div>
+              <button
+                onClick={handleUpdateDownloadCount}
+                className="px-6 py-2 rounded font-semibold"
+                style={{ backgroundColor: '#d4af37', color: '#000' }}
+              >
+                Update Count
+              </button>
+              {downloadCountUpdateMessage && (
+                <div className="mt-2 p-2 bg-green-900 border border-green-700 rounded text-green-300 text-sm">
+                  {downloadCountUpdateMessage}
+                </div>
+              )}
+              {downloadCountUpdateError && (
+                <div className="mt-2 p-2 bg-red-900 border border-red-700 rounded text-red-300 text-sm flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                  <span>{downloadCountUpdateError}</span>
                 </div>
               )}
             </div>

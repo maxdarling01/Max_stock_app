@@ -52,6 +52,32 @@ export async function generateEmbedding(text: string): Promise<number[] | null> 
   }
 }
 
+const synonymMap: Record<string, string[]> = {
+  'car': ['vehicle', 'automobile', 'driving', 'sedan', 'coupe', 'convertible', 'roadster', 'transportation', 'motor', 'engine', 'wheels', 'auto', 'ride', 'cruising', 'racing', 'Ferrari', 'Bugatti', 'Pagani', 'Corvette', 'Ford GT', 'Koenigsegg', 'Jesko', 'Rolls Royce', 'Audi', 'Aston Martin', 'Lamborghini', 'McLaren', 'Porsche', 'Bentley', 'Maserati', 'Mercedes', 'Alfa Romeo', 'Lexus'],
+  'beach': ['ocean', 'water', 'sand', 'shore', 'coast', 'seaside', 'waves', 'tropical', 'paradise', 'surf', 'seashore', 'bay', 'coastline', 'marine', 'aquatic'],
+  'sunset': ['dusk', 'evening', 'golden hour', 'sunrise', 'sun', 'dawn', 'twilight', 'horizon', 'sky', 'sundown', 'amber', 'glow', 'daybreak', 'morning', 'rays'],
+  'watch': ['timepiece', 'clock', 'wristwatch', 'diamond watch', 'diamonds', 'chronograph', 'luxury watch', 'horology', 'bracelet', 'jewels', 'gems', 'timekeeper', 'rolex', 'patek', 'audemars'],
+  'yacht': ['boat', 'vessel', 'ship', 'sailing', 'cruiser', 'sailboat', 'maritime', 'nautical', 'watercraft', 'catamaran', 'marina', 'harbor', 'seafaring', 'deck', 'captain'],
+  'supercar': ['car', 'vehicle', 'sports car', 'fast car', 'automobile', 'exotic car', 'hypercar', 'performance car', 'racing car', 'luxury car', 'speedster', 'coupe', 'acceleration', 'horsepower', 'Ferrari', 'Bugatti', 'Pagani', 'Corvette', 'Ford GT', 'Koenigsegg', 'Jesko', 'Rolls Royce', 'Audi', 'Aston Martin', 'Lamborghini', 'McLaren', 'Porsche', 'Bentley', 'Maserati', 'Mercedes', 'Alfa Romeo', 'Lexus'],
+  'bugatti': ['car', 'vehicle', 'automobile', 'supercar', 'hypercar', 'sports car', 'luxury car', 'exotic car', 'fast car', 'racing', 'performance', 'expensive', 'elite'],
+};
+
+function expandTagWithSynonyms(tag: string): string[] {
+  const normalized = tag.toLowerCase();
+  const synonyms = synonymMap[normalized] || [];
+  return [tag, ...synonyms];
+}
+
 export function combinedSearchText(tags: string[], category: string): string {
-  return `${tags.join(' ')} ${category}`.trim();
+  const expandedTerms: Set<string> = new Set();
+
+  tags.forEach(tag => {
+    expandTagWithSynonyms(tag).forEach(term => expandedTerms.add(term));
+  });
+
+  if (category) {
+    expandTagWithSynonyms(category).forEach(term => expandedTerms.add(term));
+  }
+
+  return Array.from(expandedTerms).join(' ').trim();
 }

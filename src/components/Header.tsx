@@ -16,12 +16,12 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-50">
+    <header className="bg-black shadow-sm sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <Link to={user ? "/home" : "/"} className="flex items-center space-x-2 group">
-            <Camera className="w-8 h-8 text-blue-600 group-hover:text-blue-700 transition-colors" />
-            <span className="text-xl font-bold text-gray-900">Maximum Stock</span>
+            <Camera className="w-8 h-8 transition-colors" style={{ color: '#d4af37' }} />
+            <span className="text-xl font-bold text-white">Maximum Stock</span>
           </Link>
 
           <nav className="hidden md:flex items-center space-x-8">
@@ -31,30 +31,31 @@ export default function Header() {
                   to="/home"
                   className={`${
                     isActive('/home') || isActive('/search')
-                      ? 'text-blue-600 font-semibold'
-                      : 'text-gray-600 hover:text-blue-600'
+                      ? 'font-semibold underline'
+                      : 'text-white hover:text-opacity-80'
                   } transition-colors`}
+                  style={{
+                    color: isActive('/home') || isActive('/search') ? '#d4af37' : 'white'
+                  }}
                 >
                   Browse
                 </Link>
                 <Link
                   to="/license"
-                  className={`${
-                    isActive('/license')
-                      ? 'text-blue-600 font-semibold'
-                      : 'text-gray-600 hover:text-blue-600'
-                  } transition-colors`}
+                  className="text-white hover:text-opacity-80 transition-colors"
+                  style={{
+                    color: isActive('/license') ? '#d4af37' : 'white'
+                  }}
                 >
                   License
                 </Link>
                 {user.email === 'maxdarling84@gmail.com' && (
                   <Link
                     to="/admin/upload"
-                    className={`${
-                      isActive('/admin/upload')
-                        ? 'text-blue-600 font-semibold'
-                        : 'text-gray-600 hover:text-blue-600'
-                    } transition-colors`}
+                    className="text-white hover:text-opacity-80 transition-colors"
+                    style={{
+                      color: isActive('/admin/upload') ? '#d4af37' : 'white'
+                    }}
                   >
                     Admin Upload
                   </Link>
@@ -63,7 +64,7 @@ export default function Header() {
             )}
             <a
               href="#about"
-              className="text-gray-600 hover:text-blue-600 transition-colors"
+              className="text-white hover:text-opacity-80 transition-colors"
             >
               About
             </a>
@@ -72,10 +73,10 @@ export default function Header() {
           <div className="hidden md:flex items-center space-x-4">
             {user ? (
               <>
-                <span className="text-sm text-gray-600">{user.email}</span>
+                <span className="text-sm text-gray-300">{user.email}</span>
                 <button
                   onClick={handleSignOut}
-                  className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 text-white hover:text-opacity-80 transition-colors"
                 >
                   <LogOut className="w-4 h-4" />
                   Sign Out
@@ -85,13 +86,14 @@ export default function Header() {
               <>
                 <Link
                   to="/signin"
-                  className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
+                  className="text-white hover:text-opacity-80 font-medium transition-colors"
                 >
                   Sign In
                 </Link>
                 <Link
                   to="/signup"
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+                  className="px-4 py-2 font-medium rounded-lg transition-colors"
+                  style={{ backgroundColor: '#d4af37', color: '#000' }}
                 >
                   Get Started
                 </Link>
@@ -100,8 +102,9 @@ export default function Header() {
           </div>
 
           <button
-            className="md:hidden p-2 text-gray-600 hover:text-blue-600 transition-colors"
+            className="md:hidden p-2 text-white transition-colors"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            style={{ color: mobileMenuOpen ? '#d4af37' : 'white' }}
           >
             {mobileMenuOpen ? (
               <X className="w-6 h-6" />
@@ -113,28 +116,26 @@ export default function Header() {
       </div>
 
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white border-t">
+        <div className="md:hidden bg-gray-950 border-t border-gray-800">
           <nav className="flex flex-col px-4 py-4 space-y-3">
             {user && (
               <>
                 <Link
                   to="/home"
-                  className={`${
-                    isActive('/home') || isActive('/search')
-                      ? 'text-blue-600 font-semibold'
-                      : 'text-gray-600'
-                  } py-2 text-lg`}
+                  className="py-2 text-lg transition-colors"
+                  style={{
+                    color: isActive('/home') || isActive('/search') ? '#d4af37' : 'white'
+                  }}
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Browse
                 </Link>
                 <Link
                   to="/license"
-                  className={`${
-                    isActive('/license')
-                      ? 'text-blue-600 font-semibold'
-                      : 'text-gray-600'
-                  } py-2 text-lg`}
+                  className="py-2 text-lg transition-colors"
+                  style={{
+                    color: isActive('/license') ? '#d4af37' : 'white'
+                  }}
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   License
@@ -142,11 +143,10 @@ export default function Header() {
                 {user.email === 'maxdarling84@gmail.com' && (
                   <Link
                     to="/admin/upload"
-                    className={`${
-                      isActive('/admin/upload')
-                        ? 'text-blue-600 font-semibold'
-                        : 'text-gray-600'
-                    } py-2 text-lg`}
+                    className="py-2 text-lg transition-colors"
+                    style={{
+                      color: isActive('/admin/upload') ? '#d4af37' : 'white'
+                    }}
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Admin Upload
@@ -156,18 +156,18 @@ export default function Header() {
             )}
             <a
               href="#about"
-              className="text-gray-600 py-2 text-lg"
+              className="text-white py-2 text-lg"
               onClick={() => setMobileMenuOpen(false)}
             >
               About
             </a>
-            <div className="pt-2 border-t">
+            <div className="pt-2 border-t border-gray-800">
               {user ? (
                 <>
-                  <p className="text-sm text-gray-600 py-2">{user.email}</p>
+                  <p className="text-sm text-gray-300 py-2">{user.email}</p>
                   <button
                     onClick={handleSignOut}
-                    className="w-full text-left flex items-center gap-2 px-2 py-2 text-gray-600 hover:text-gray-900 transition-colors"
+                    className="w-full text-left flex items-center gap-2 px-2 py-2 text-white hover:text-opacity-80 transition-colors"
                   >
                     <LogOut className="w-4 h-4" />
                     Sign Out
@@ -177,14 +177,15 @@ export default function Header() {
                 <>
                   <Link
                     to="/signin"
-                    className="block text-gray-600 hover:text-gray-900 py-2 font-medium"
+                    className="block text-white hover:text-opacity-80 py-2 font-medium"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Sign In
                   </Link>
                   <Link
                     to="/signup"
-                    className="block bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg px-4 py-2 mt-2 text-center"
+                    className="block text-white font-medium rounded-lg px-4 py-2 mt-2 text-center"
+                    style={{ backgroundColor: '#d4af37', color: '#000' }}
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Get Started

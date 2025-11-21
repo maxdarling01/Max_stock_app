@@ -64,8 +64,8 @@ export default function SearchPage() {
         if (embedding) {
           const { data: semanticResults, error } = await supabase.rpc('match_assets', {
             query_embedding: embedding,
-            match_threshold: 0.7,
-            match_count: 50,
+            match_threshold: 0.2,
+            match_count: 30,
           });
 
           if (error) {
@@ -147,8 +147,9 @@ export default function SearchPage() {
     if (!isAI || typeof asset.similarity !== 'number') return undefined;
 
     if (asset.similarity >= 0.85) return 'Perfect Match';
-    if (asset.similarity >= 0.75) return 'Great Match';
-    return 'Good Match';
+    if (asset.similarity >= 0.70) return 'Great Match';
+    if (asset.similarity >= 0.35) return 'Good Match';
+    return undefined;
   };
 
   const categories = ['all', ...allCategories];
@@ -304,8 +305,9 @@ export default function SearchPage() {
               <main className="flex-1">
                 {results.length === 0 ? (
                   <div className="text-center py-16 bg-gray-50 rounded-lg">
-                    <p className="text-gray-600 text-lg mb-2">No results found</p>
-                    <p className="text-gray-500">Try adjusting your search or filters</p>
+                    <p className="text-gray-600 text-lg mb-2">No matches found</p>
+                    <p className="text-gray-500 mb-4">AI search looks for similar content.</p>
+                    <p className="text-gray-500">Try: simpler terms, different words, or Keyword Search</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
