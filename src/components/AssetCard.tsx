@@ -43,12 +43,12 @@ export default function AssetCard({ asset, relevanceBadge, similarity }: AssetCa
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <div className="relative aspect-video overflow-hidden bg-gray-200">
+      <div className="relative overflow-hidden bg-gray-200 w-full" style={{ aspectRatio: 'auto' }}>
         {asset.type === 'video' && asset.file_url ? (
           <>
             <video
               src={asset.file_url}
-              className="absolute inset-0 w-full h-full object-contain"
+              className="w-full h-auto block"
               muted
               preload="metadata"
             />
@@ -68,7 +68,7 @@ export default function AssetCard({ asset, relevanceBadge, similarity }: AssetCa
           <img
             src={asset.thumbnail_url}
             alt={asset.title}
-            className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
+            className="w-full h-auto block group-hover:scale-110 transition-transform duration-500"
           />
         )}
         {asset.type === 'video' && (
