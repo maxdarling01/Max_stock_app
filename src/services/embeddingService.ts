@@ -2,7 +2,7 @@ export interface EmbeddingResult {
   embedding: number[];
 }
 
-const NETLIFY_FUNCTION_URL = '/.netlify/functions/generate-embeddings';
+const EMBEDDING_FUNCTION_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-embeddings`;
 const EMBEDDING_CACHE: Map<string, number[]> = new Map();
 
 export async function generateEmbedding(text: string): Promise<number[] | null> {
@@ -16,10 +16,11 @@ export async function generateEmbedding(text: string): Promise<number[] | null> 
   }
 
   try {
-    const response = await fetch(NETLIFY_FUNCTION_URL, {
+    const response = await fetch(EMBEDDING_FUNCTION_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
       },
       body: JSON.stringify({ text: trimmedText }),
     });
