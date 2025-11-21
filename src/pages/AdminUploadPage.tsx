@@ -275,34 +275,69 @@ export default function AdminUploadPage() {
     }
   };
 
-  const handleAddTag = () => {
+  const handleAddTag = async () => {
     if (newTag.trim() && !tags.includes(newTag.trim())) {
-      setTags([...tags, newTag.trim()]);
+      const updatedTags = [...tags, newTag.trim()];
+      setTags(updatedTags);
       setNewTag('');
+
+      if (uploadedAssetId) {
+        await updateTagsInDatabase(updatedTags);
+      }
     }
   };
 
-  const handleRemoveTag = (tagToRemove: string) => {
-    setTags(tags.filter(tag => tag !== tagToRemove));
+  const handleRemoveTag = async (tagToRemove: string) => {
+    const updatedTags = tags.filter(tag => tag !== tagToRemove);
+    setTags(updatedTags);
+
+    if (uploadedAssetId) {
+      await updateTagsInDatabase(updatedTags);
+    }
   };
 
-  const handleUpdateTags = async () => {
+  const updateTagsInDatabase = async (updatedTags: string[]) => {
     setTagUpdateMessage('');
     setTagUpdateError('');
+    setEmbeddingMessage('Updating AI search data...');
+
     try {
+      let embedding: number[] | null = null;
+
+      try {
+        const searchText = combinedSearchText(
+          updatedTags,
+          selectedCategories.join(' ')
+        );
+        embedding = await generateEmbedding(searchText);
+      } catch (embeddingError) {
+        console.error('Embedding generation error during tag update:', embeddingError);
+      }
+
+      const updateData: any = { tags: updatedTags };
+      if (embedding) {
+        updateData.embedding = `[${embedding.join(',')}]`;
+      }
+
       const { error: updateError } = await supabase
         .from('assets')
-        .update({ tags })
+        .update(updateData)
         .eq('id', uploadedAssetId);
 
       if (updateError) throw updateError;
 
-      setTagUpdateMessage('Tags updated successfully!');
+      setTagUpdateMessage('Tags and AI search data updated!');
+      setEmbeddingMessage('');
       setTimeout(() => setTagUpdateMessage(''), 3000);
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Failed to update tags';
       setTagUpdateError(errorMsg);
+      setEmbeddingMessage('');
     }
+  };
+
+  const handleUpdateTags = async () => {
+    await updateTagsInDatabase(tags);
   };
 
   const handleUpdateCategories = async () => {
@@ -487,7 +522,7 @@ export default function AdminUploadPage() {
                 className="px-6 py-2 rounded font-semibold"
                 style={{ backgroundColor: '#d4af37', color: '#000' }}
               >
-                Update Tags
+                Regenerate AI Search
               </button>
               {tagUpdateMessage && (
                 <div className="mt-2 p-2 bg-green-900 border border-green-700 rounded text-green-300 text-sm">

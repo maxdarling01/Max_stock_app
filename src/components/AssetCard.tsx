@@ -48,14 +48,14 @@ export default function AssetCard({ asset, relevanceBadge, similarity }: AssetCa
           <>
             <video
               src={asset.file_url}
-              className="absolute inset-0 w-full h-full object-cover"
+              className="absolute inset-0 w-full h-full object-contain"
               muted
               preload="metadata"
             />
             <video
               ref={videoRef}
               src={asset.file_url}
-              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
+              className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${
                 isHovering ? 'opacity-100' : 'opacity-0'
               }`}
               muted
@@ -68,7 +68,7 @@ export default function AssetCard({ asset, relevanceBadge, similarity }: AssetCa
           <img
             src={asset.thumbnail_url}
             alt={asset.title}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+            className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
           />
         )}
         {asset.type === 'video' && (

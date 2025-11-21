@@ -96,14 +96,14 @@ export default function AssetDetailPage() {
                 <>
                   <video
                     src={asset.file_url}
-                    className="absolute inset-0 w-full h-full object-cover"
+                    className="absolute inset-0 w-full h-full object-contain"
                     muted
                     preload="metadata"
                   />
                   <video
                     ref={videoRef}
                     src={asset.file_url}
-                    className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
+                    className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${
                       isHoveringVideo ? 'opacity-100' : 'opacity-0'
                     }`}
                     muted
@@ -116,7 +116,7 @@ export default function AssetDetailPage() {
                 <img
                   src={asset.thumbnail_url}
                   alt={asset.title}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain"
                 />
               )}
               {asset.type === 'video' && (
