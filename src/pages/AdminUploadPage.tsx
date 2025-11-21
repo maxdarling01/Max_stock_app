@@ -209,7 +209,8 @@ export default function AdminUploadPage() {
           console.warn('Embedding generation returned null, continuing without embedding');
         }
       } catch (embeddingError) {
-        setEmbeddingWarning('Could not generate AI search data. Video will be searchable with keywords only.');
+        const errorMsg = embeddingError instanceof Error ? embeddingError.message : 'Unknown error';
+        setEmbeddingWarning(`Could not generate AI search data: ${errorMsg}. Video will be searchable with keywords only.`);
         console.error('Embedding generation error:', embeddingError);
       }
 

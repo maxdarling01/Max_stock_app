@@ -7,7 +7,7 @@ const EMBEDDING_CACHE: Map<string, number[]> = new Map();
 
 export async function generateEmbedding(text: string): Promise<number[] | null> {
   if (!text.trim()) {
-    return null;
+    throw new Error('Cannot generate embedding: text is empty');
   }
 
   const trimmedText = text.trim();
@@ -25,23 +25,29 @@ export async function generateEmbedding(text: string): Promise<number[] | null> 
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error('Embedding generation failed:', errorData);
-      return null;
+      let errorMessage = `API returned status ${response.status}`;
+      try {
+        const errorData = await response.json();
+        if (errorData.error) {
+          errorMessage = errorData.error;
+        }
+      } catch {
+        // If response isn't JSON, use status message
+      }
+      throw new Error(errorMessage);
     }
 
     const data: EmbeddingResult = await response.json();
 
     if (!data.embedding || !Array.isArray(data.embedding)) {
-      console.error('Invalid embedding response format');
-      return null;
+      throw new Error('Invalid response format from embedding API: embedding is missing or not an array');
     }
 
     EMBEDDING_CACHE.set(trimmedText, data.embedding);
     return data.embedding;
   } catch (error) {
-    console.error('Error generating embedding:', error);
-    return null;
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    throw new Error(`Failed to generate embedding: ${errorMessage}`);
   }
 }
 
