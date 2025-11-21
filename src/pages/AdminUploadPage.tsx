@@ -231,7 +231,7 @@ export default function AdminUploadPage() {
           formats: [extension],
           download_count: 0,
           duration,
-          embedding: embedding || null
+          embedding: embedding ? `[${embedding.join(',')}]` : null
         })
         .select()
         .single();
