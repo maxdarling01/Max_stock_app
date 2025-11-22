@@ -10,6 +10,8 @@ import LandingPage from './pages/LandingPage';
 import SignUpPage from './pages/SignUpPage';
 import SignInPage from './pages/SignInPage';
 import AdminUploadPage from './pages/AdminUploadPage';
+import PricingPage from './pages/PricingPage';
+import SuccessPage from './pages/SuccessPage';
 
 function AppContent() {
   const { user, loading } = useAuth();
@@ -36,6 +38,8 @@ function AppContent() {
           <Route path="/license" element={<LicensePage />} />
           <Route path="/home" element={<HomePage />} />
           <Route path="/admin/upload" element={<AdminUploadPage />} />
+          <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/success" element={<SuccessPage />} />
         </Routes>
       </main>
       <Footer />

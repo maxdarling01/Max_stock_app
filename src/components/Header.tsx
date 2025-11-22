@@ -41,6 +41,15 @@ export default function Header() {
                   Browse
                 </Link>
                 <Link
+                  to="/pricing"
+                  className="text-white hover:text-opacity-80 transition-colors"
+                  style={{
+                    color: isActive('/pricing') ? '#d4af37' : 'white'
+                  }}
+                >
+                  Pricing
+                </Link>
+                <Link
                   to="/license"
                   className="text-white hover:text-opacity-80 transition-colors"
                   style={{
@@ -129,6 +138,16 @@ export default function Header() {
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Browse
+                </Link>
+                <Link
+                  to="/pricing"
+                  className="py-2 text-lg transition-colors"
+                  style={{
+                    color: isActive('/pricing') ? '#d4af37' : 'white'
+                  }}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Pricing
                 </Link>
                 <Link
                   to="/license"
