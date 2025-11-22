@@ -77,7 +77,7 @@ export default function AssetDetailPage() {
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
             <div
-              className="bg-gray-900 rounded-xl overflow-hidden relative group w-full flex items-center justify-center"
+              className="bg-black rounded-xl overflow-hidden relative group w-full"
               style={{ maxHeight: '70vh', aspectRatio: '9 / 16' }}
               onMouseEnter={() => {
                 setIsHoveringVideo(true);
@@ -95,18 +95,15 @@ export default function AssetDetailPage() {
             >
               {asset.type === 'video' && asset.file_url ? (
                 <>
-                  <div
-                    className="absolute inset-0"
-                    style={{
-                      backgroundImage: `url(${asset.thumbnail_url})`,
-                      backgroundSize: 'cover',
-                      backgroundPosition: 'center',
-                    }}
+                  <img
+                    src={asset.thumbnail_url}
+                    alt={asset.title}
+                    className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${isHoveringVideo ? 'opacity-0' : 'opacity-100'}`}
                   />
                   <video
                     ref={videoRef}
                     src={asset.file_url}
-                    className={`relative w-full h-full object-contain transition-opacity duration-300 ${isHoveringVideo ? 'opacity-100' : 'opacity-0'}`}
+                    className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${isHoveringVideo ? 'opacity-100' : 'opacity-0'}`}
                     muted
                     loop
                     playsInline
@@ -117,7 +114,7 @@ export default function AssetDetailPage() {
                 <img
                   src={asset.thumbnail_url}
                   alt={asset.title}
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-cover"
                 />
               )}
               {asset.type === 'video' && (
