@@ -98,7 +98,7 @@ export default function AssetDetailPage() {
                   <img
                     src={asset.thumbnail_url}
                     alt={asset.title}
-                    className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${isHoveringVideo ? 'opacity-0' : 'opacity-100'}`}
+                    className="absolute inset-0 w-full h-full object-contain"
                   />
                   <video
                     ref={videoRef}
