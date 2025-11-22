@@ -95,18 +95,15 @@ export default function AssetDetailPage() {
             >
               {asset.type === 'video' && asset.file_url ? (
                 <>
-                  <div
-                    className="absolute inset-0"
-                    style={{
-                      backgroundImage: `url(${asset.thumbnail_url})`,
-                      backgroundSize: 'cover',
-                      backgroundPosition: 'center',
-                    }}
+                  <img
+                    src={asset.thumbnail_url}
+                    alt={asset.title}
+                    className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${isHoveringVideo ? 'opacity-0' : 'opacity-100'}`}
                   />
                   <video
                     ref={videoRef}
                     src={asset.file_url}
-                    className={`relative w-full h-full object-contain transition-opacity duration-300 ${isHoveringVideo ? 'opacity-100' : 'opacity-0'}`}
+                    className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${isHoveringVideo ? 'opacity-100' : 'opacity-0'}`}
                     muted
                     loop
                     playsInline
@@ -122,12 +119,12 @@ export default function AssetDetailPage() {
               )}
               {asset.type === 'video' && (
                 <div
-                  className={`absolute inset-0 flex items-center justify-center bg-black transition-all ${
-                    isHoveringVideo ? 'bg-opacity-0' : 'bg-opacity-30'
+                  className={`absolute inset-0 flex items-center justify-center bg-black transition-all pointer-events-none ${
+                    isHoveringVideo ? 'bg-opacity-0 opacity-0' : 'bg-opacity-30 opacity-100'
                   }`}
                 >
                   {!isHoveringVideo && (
-                    <div className="w-20 h-20 rounded-full bg-white bg-opacity-90 flex items-center justify-center group-hover:scale-110 transition-transform cursor-pointer">
+                    <div className="w-20 h-20 rounded-full bg-white bg-opacity-90 flex items-center justify-center group-hover:scale-110 transition-transform">
                       <Play className="w-10 h-10 text-yellow-500 ml-1" />
                     </div>
                   )}
