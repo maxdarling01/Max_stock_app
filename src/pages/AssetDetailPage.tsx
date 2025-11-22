@@ -77,8 +77,8 @@ export default function AssetDetailPage() {
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
             <div
-              className="bg-gray-900 rounded-xl overflow-hidden relative group w-full"
-              style={{ maxHeight: '60vh' }}
+              className="bg-gray-900 rounded-xl overflow-hidden relative group w-full flex items-center justify-center"
+              style={{ maxHeight: '70vh', aspectRatio: '9 / 16' }}
               onMouseEnter={() => {
                 setIsHoveringVideo(true);
                 if (videoRef.current && asset.type === 'video' && asset.file_url) {
@@ -95,16 +95,18 @@ export default function AssetDetailPage() {
             >
               {asset.type === 'video' && asset.file_url ? (
                 <>
-                  <video
-                    src={asset.file_url}
-                    className="w-full h-auto block"
-                    muted
-                    preload="metadata"
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      backgroundImage: `url(${asset.thumbnail_url})`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                    }}
                   />
                   <video
                     ref={videoRef}
                     src={asset.file_url}
-                    className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${isHoveringVideo ? 'opacity-100' : 'opacity-0'}`}
+                    className={`relative w-full h-full object-contain transition-opacity duration-300 ${isHoveringVideo ? 'opacity-100' : 'opacity-0'}`}
                     muted
                     loop
                     playsInline
@@ -115,7 +117,7 @@ export default function AssetDetailPage() {
                 <img
                   src={asset.thumbnail_url}
                   alt={asset.title}
-                  className="w-full h-auto block"
+                  className="w-full h-full object-contain"
                 />
               )}
               {asset.type === 'video' && (
