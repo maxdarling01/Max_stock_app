@@ -54,6 +54,8 @@ import { Success } from './pages/Success';
 }
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
+    }
+  )
   const { user, loading } = useAuth();
   
   if (loading) {
