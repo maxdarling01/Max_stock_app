@@ -95,10 +95,11 @@ export default function AssetDetailPage() {
             >
               {asset.type === 'video' && asset.file_url ? (
                 <>
-                  <img
-                    src={asset.thumbnail_url}
-                    alt={asset.title}
-                    className="absolute inset-0 w-full h-full object-contain"
+                  <video
+                    src={asset.file_url}
+                    className="w-full h-full object-contain block"
+                    muted
+                    preload="metadata"
                   />
                   <video
                     ref={videoRef}
