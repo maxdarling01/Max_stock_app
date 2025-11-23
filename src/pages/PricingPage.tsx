@@ -4,11 +4,11 @@ import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
 const STRIPE_PRICE_IDS = {
-  basic: 'price_REPLACE_WITH_YOUR_BASIC_PRICE_ID',
-  pro: 'price_REPLACE_WITH_YOUR_PRO_PRICE_ID',
-  elite: 'price_REPLACE_WITH_YOUR_ELITE_PRICE_ID',
-  legendary: 'price_REPLACE_WITH_YOUR_LEGENDARY_PRICE_ID',
-  personalized: 'price_REPLACE_WITH_YOUR_PERSONALIZED_PRICE_ID',
+  basic: 'price_1SWMkEAViJR9tCfxxBexPSmD',
+  pro: 'price_1SWMmWAViJR9tCfxgFABERlT',
+  elite: 'price_1SWMnBAViJR9tCfxhsunTR4r',
+  legendary: 'price_1SWMo7AViJR9tCfxvo2sIcoP',
+  personalized: 'price_1SWMosAViJR9tCfxdQEMI5iO',
 };
 
 export default function PricingPage() {
