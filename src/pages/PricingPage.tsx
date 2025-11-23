@@ -1,4 +1,4 @@
-import { Check, ArrowLeft, Shield, Star, Sparkles } from 'lucide-react';
+import { Check, ArrowLeft, Shield, Star, Sparkles, XCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
@@ -14,10 +14,13 @@ const STRIPE_PRICE_IDS = {
 export default function PricingPage() {
   const { user } = useAuth();
   const [loading, setLoading] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string>('');
 
   const handleCheckout = async (priceId: string, isSubscription: boolean) => {
+    setErrorMessage('');
+
     if (priceId.includes('REPLACE_WITH_YOUR')) {
-      alert('Stripe Price IDs need to be configured. Please update the STRIPE_PRICE_IDS in PricingPage.tsx with your actual Stripe Price IDs from your Stripe Dashboard.');
+      setErrorMessage('Stripe Price IDs need to be configured. Please update the STRIPE_PRICE_IDS in PricingPage.tsx with your actual Stripe Price IDs from your Stripe Dashboard.');
       return;
     }
 
@@ -56,13 +59,14 @@ export default function PricingPage() {
 
       if (!url || typeof url !== 'string' || !url.includes('stripe.com')) {
         console.error('Invalid URL returned:', url);
-        throw new Error('Invalid checkout URL received. Please make sure your Stripe secret key is configured correctly in Supabase Edge Functions settings.');
+        throw new Error('Stripe is not configured correctly. Please contact support or check that your Stripe secret key is set up in Supabase Edge Functions.');
       }
 
       window.location.href = url;
     } catch (error) {
       console.error('Checkout error:', error);
-      alert(`Failed to start checkout: ${error instanceof Error ? error.message : 'Please try again.'}`);
+      const errorMsg = error instanceof Error ? error.message : 'Failed to start checkout. Please try again.';
+      setErrorMessage(errorMsg);
     } finally {
       setLoading(null);
     }
@@ -78,6 +82,30 @@ export default function PricingPage() {
           <ArrowLeft className="w-5 h-5" />
           Back to Browse
         </Link>
+
+        {errorMessage && (
+          <div className="mb-8 p-6 bg-red-900 border-2 border-red-600 rounded-lg flex items-start gap-4 animate-fadeIn">
+            <XCircle className="w-6 h-6 text-red-300 flex-shrink-0 mt-1" />
+            <div className="flex-1">
+              <h3 className="text-lg font-bold text-red-100 mb-2">Checkout Error</h3>
+              <p className="text-red-200 mb-4">{errorMessage}</p>
+              <div className="bg-red-950 border border-red-800 rounded p-4 text-sm text-red-200">
+                <p className="font-semibold mb-2">Common Solutions:</p>
+                <ul className="list-disc list-inside space-y-1">
+                  <li>Check that your Stripe secret key is configured in Supabase Edge Functions</li>
+                  <li>Verify that the Stripe Price IDs match your Stripe Dashboard products</li>
+                  <li>Make sure the create-stripe-checkout function is deployed</li>
+                </ul>
+              </div>
+            </div>
+            <button
+              onClick={() => setErrorMessage('')}
+              className="text-red-300 hover:text-red-100 transition-colors"
+            >
+              <XCircle className="w-6 h-6" />
+            </button>
+          </div>
+        )}
 
         <div className="text-center mb-16">
           <h1 className="text-5xl font-bold mb-4" style={{ color: '#d4af37' }}>
