@@ -4,11 +4,11 @@ import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
 const STRIPE_PRICE_IDS = {
-  basic: 'prod_TTJMneIVyc2z2H',
-  pro: 'prod_TTJPjD6Iar6t6i',
-  elite: 'prod_TTJQXaidnkebBk',
-  legendary: 'prod_TTJQQsLB3k8VAW',
-  personalized: 'prod_TTJRzeK87f0B60',
+  basic: 'price_REPLACE_WITH_YOUR_BASIC_PRICE_ID',
+  pro: 'price_REPLACE_WITH_YOUR_PRO_PRICE_ID',
+  elite: 'price_REPLACE_WITH_YOUR_ELITE_PRICE_ID',
+  legendary: 'price_REPLACE_WITH_YOUR_LEGENDARY_PRICE_ID',
+  personalized: 'price_REPLACE_WITH_YOUR_PERSONALIZED_PRICE_ID',
 };
 
 export default function PricingPage() {
@@ -16,6 +16,11 @@ export default function PricingPage() {
   const [loading, setLoading] = useState<string | null>(null);
 
   const handleCheckout = async (priceId: string, isSubscription: boolean) => {
+    if (priceId.includes('REPLACE_WITH_YOUR')) {
+      alert('Stripe Price IDs need to be configured. Please update the STRIPE_PRICE_IDS in PricingPage.tsx with your actual Stripe Price IDs from your Stripe Dashboard.');
+      return;
+    }
+
     setLoading(priceId);
 
     try {
@@ -38,14 +43,19 @@ export default function PricingPage() {
       );
 
       if (!response.ok) {
-        throw new Error('Failed to create checkout session');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to create checkout session');
       }
 
       const { url } = await response.json();
-      window.location.href = url;
+      if (url) {
+        window.location.href = url;
+      } else {
+        throw new Error('No checkout URL returned');
+      }
     } catch (error) {
       console.error('Checkout error:', error);
-      alert('Failed to start checkout. Please try again.');
+      alert(`Failed to start checkout: ${error instanceof Error ? error.message : 'Please try again.'}`);
     } finally {
       setLoading(null);
     }
