@@ -44,15 +44,22 @@ export default function PricingPage() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Failed to create checkout session');
+        throw new Error(errorData.error || `HTTP ${response.status}: Failed to create checkout session`);
       }
 
-      const { url } = await response.json();
-      if (url) {
-        window.location.href = url;
-      } else {
-        throw new Error('No checkout URL returned');
+      const responseData = await response.json();
+      const { url, error } = responseData;
+
+      if (error) {
+        throw new Error(error);
       }
+
+      if (!url || typeof url !== 'string' || !url.includes('stripe.com')) {
+        console.error('Invalid URL returned:', url);
+        throw new Error('Invalid checkout URL received. Please make sure your Stripe secret key is configured correctly in Supabase Edge Functions settings.');
+      }
+
+      window.location.href = url;
     } catch (error) {
       console.error('Checkout error:', error);
       alert(`Failed to start checkout: ${error instanceof Error ? error.message : 'Please try again.'}`);
