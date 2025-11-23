@@ -1,6 +1,6 @@
 import { Check, ArrowLeft, Shield, Star, Sparkles, XCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
 const STRIPE_PRICE_IDS = {
@@ -15,6 +15,20 @@ export default function PricingPage() {
   const { user } = useAuth();
   const [loading, setLoading] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>('');
+
+  useEffect(() => {
+    const storedError = localStorage.getItem('stripe_checkout_error');
+    if (storedError) {
+      setErrorMessage(storedError);
+      localStorage.removeItem('stripe_checkout_error');
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('checkout') === 'cancelled') {
+      setErrorMessage('Checkout was cancelled. Please try again or select a different plan.');
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
 
   const handleCheckout = async (priceId: string, isSubscription: boolean) => {
     setErrorMessage('');
@@ -39,8 +53,8 @@ export default function PricingPage() {
             priceId,
             isSubscription,
             customerEmail: user?.email,
-            successUrl: `${window.location.origin}/success`,
-            cancelUrl: `${window.location.origin}/pricing`,
+            successUrl: `${window.location.origin}/success?payment=true`,
+            cancelUrl: `${window.location.origin}/pricing?checkout=cancelled`,
           }),
         }
       );
@@ -67,6 +81,7 @@ export default function PricingPage() {
       console.error('Checkout error:', error);
       const errorMsg = error instanceof Error ? error.message : 'Failed to start checkout. Please try again.';
       setErrorMessage(errorMsg);
+      localStorage.setItem('stripe_checkout_error', errorMsg);
     } finally {
       setLoading(null);
     }
