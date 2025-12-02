@@ -2,6 +2,7 @@ import { Camera, Menu, X, LogOut } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import SubscriptionBadge from './SubscriptionBadge';
 
 export default function Header() {
   const location = useLocation();
@@ -82,7 +83,7 @@ export default function Header() {
           <div className="hidden md:flex items-center space-x-4">
             {user ? (
               <>
-                <span className="text-sm text-gray-300">{user.email}</span>
+                <SubscriptionBadge />
                 <button
                   onClick={handleSignOut}
                   className="flex items-center gap-2 px-4 py-2 text-white hover:text-opacity-80 transition-colors"

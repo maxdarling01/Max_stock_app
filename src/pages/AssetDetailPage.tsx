@@ -3,17 +3,25 @@ import { useState, useEffect, useRef } from 'react';
 import { Film, Download, ChevronRight, Play } from 'lucide-react';
 import { Asset } from '../data/mockAssets';
 import { fetchAssets, categoryIncludes, getCategoryArray } from '../services/assetService';
+import { useAuth } from '../contexts/AuthContext';
+import { getUserSubscription, decrementDownloads, checkAndResetDownloads } from '../services/subscriptionService';
 import AssetCard from '../components/AssetCard';
 import DownloadModal from '../components/DownloadModal';
+import { SubscribeModal, OutOfDownloadsModal, SignInModal } from '../components/DownloadModals';
 
 export default function AssetDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [showDownloadModal, setShowDownloadModal] = useState(false);
+  const [showSubscribeModal, setShowSubscribeModal] = useState(false);
+  const [showOutOfDownloadsModal, setShowOutOfDownloadsModal] = useState(false);
+  const [showSignInModal, setShowSignInModal] = useState(false);
   const [asset, setAsset] = useState<Asset | null>(null);
   const [similarAssets, setSimilarAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
   const [isHoveringVideo, setIsHoveringVideo] = useState(false);
+  const [subscription, setSubscription] = useState<any>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -39,6 +47,63 @@ export default function AssetDetailPage() {
     };
     loadAsset();
   }, [id]);
+
+  useEffect(() => {
+    const loadSubscription = async () => {
+      if (user) {
+        await checkAndResetDownloads(user.id);
+        const sub = await getUserSubscription(user.id);
+        setSubscription(sub);
+      }
+    };
+    loadSubscription();
+  }, [user]);
+
+  const handleDownloadClick = async () => {
+    if (!user) {
+      setShowSignInModal(true);
+      return;
+    }
+
+    if (!subscription || subscription.plan_type === 'none') {
+      setShowSubscribeModal(true);
+      return;
+    }
+
+    if (subscription.plan_type !== 'legendary' && subscription.downloads_remaining <= 0) {
+      setShowOutOfDownloadsModal(true);
+      return;
+    }
+
+    if (subscription.plan_type !== 'legendary') {
+      const success = await decrementDownloads(user.id);
+      if (!success) {
+        setShowOutOfDownloadsModal(true);
+        return;
+      }
+      const updated = await getUserSubscription(user.id);
+      setSubscription(updated);
+    }
+
+    if (asset?.file_url) {
+      window.open(asset.file_url, '_blank');
+    }
+  };
+
+  const getDownloadButtonText = () => {
+    if (!user) return 'Sign In to Download';
+    if (!subscription || subscription.plan_type === 'none') return 'Subscribe to Download';
+    if (subscription.plan_type !== 'legendary' && subscription.downloads_remaining <= 0)
+      return 'Out of Downloads';
+    return 'Download';
+  };
+
+  const isDownloadDisabled = () => {
+    if (!user) return false;
+    if (!subscription || subscription.plan_type === 'none') return false;
+    if (subscription.plan_type !== 'legendary' && subscription.downloads_remaining <= 0) return true;
+    return false;
+  };
 
   if (loading) {
     return (
@@ -216,11 +281,16 @@ export default function AssetDetailPage() {
               </div>
 
               <button
-                onClick={() => setShowDownloadModal(true)}
-                className="w-full py-4 bg-yellow-500 text-black rounded-lg font-semibold hover:bg-yellow-400 transition-all shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
+                onClick={handleDownloadClick}
+                disabled={isDownloadDisabled()}
+                className={`w-full py-4 rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl flex items-center justify-center space-x-2 ${
+                  isDownloadDisabled()
+                    ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
+                    : 'bg-yellow-500 text-black hover:bg-yellow-400'
+                }`}
               >
                 <Download className="w-5 h-5" />
-                <span>Download</span>
+                <span>{getDownloadButtonText()}</span>
               </button>
 
               <p className="text-xs text-gray-500 text-center mt-3">
@@ -246,6 +316,17 @@ export default function AssetDetailPage() {
         <DownloadModal
           asset={asset}
           onClose={() => setShowDownloadModal(false)}
+        />
+      )}
+
+      <SignInModal isOpen={showSignInModal} onClose={() => setShowSignInModal(false)} />
+      <SubscribeModal isOpen={showSubscribeModal} onClose={() => setShowSubscribeModal(false)} />
+      {subscription && (
+        <OutOfDownloadsModal
+          isOpen={showOutOfDownloadsModal}
+          onClose={() => setShowOutOfDownloadsModal(false)}
+          planType={subscription.plan_type}
+          renewalDate={subscription.current_period_end}
         />
       )}
     </>
