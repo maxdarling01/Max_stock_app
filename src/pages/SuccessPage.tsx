@@ -43,11 +43,8 @@ export default function SuccessPage() {
 
         const data = await response.json();
         setPlanDetails(data);
-        setActivating(false);
 
-        setTimeout(() => {
-          navigate('/home');
-        }, 3000);
+        navigate('/home');
       } catch (err) {
         console.error('Activation error:', err);
         setError(err instanceof Error ? err.message : 'Failed to activate subscription');
