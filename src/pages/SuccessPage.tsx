@@ -20,9 +20,15 @@ export default function SuccessPage() {
         const params = new URLSearchParams(window.location.search);
         const sessionId = params.get('session_id');
 
+        console.log('SuccessPage loaded');
+        console.log('Current URL:', window.location.href);
+        console.log('Session ID from URL:', sessionId);
+
         if (!sessionId) {
-          throw new Error('No session ID found');
+          throw new Error('No session ID found in URL');
         }
+
+        console.log('Calling activate-subscription with sessionId:', sessionId);
 
         const response = await fetch(
           `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/activate-subscription`,
@@ -38,13 +44,17 @@ export default function SuccessPage() {
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.error || 'Failed to activate subscription');
+          throw new Error(errorData.error || `HTTP ${response.status}: Failed to activate subscription`);
         }
 
         const data = await response.json();
+        console.log('Subscription activated successfully:', data);
         setPlanDetails(data);
+        setActivating(false);
 
-        navigate('/home');
+        setTimeout(() => {
+          navigate('/home');
+        }, 3000);
       } catch (err) {
         console.error('Activation error:', err);
         setError(err instanceof Error ? err.message : 'Failed to activate subscription');

@@ -31,6 +31,13 @@ Deno.serve(async (req: Request) => {
   try {
     const { priceId, isSubscription, customerEmail, successUrl, cancelUrl } = await req.json();
 
+    console.log('Creating checkout session');
+    console.log('Price ID:', priceId);
+    console.log('Is Subscription:', isSubscription);
+    console.log('Customer Email:', customerEmail);
+    console.log('Success URL (base):', successUrl);
+    console.log('Cancel URL:', cancelUrl);
+
     if (!priceId || !successUrl || !cancelUrl) {
       return new Response(
         JSON.stringify({ error: "Missing required parameters" }),
@@ -53,6 +60,9 @@ Deno.serve(async (req: Request) => {
       apiVersion: "2024-11-20.acacia",
     });
 
+    const finalSuccessUrl = `${successUrl}${successUrl.includes("?") ? "&" : "?"}session_id={CHECKOUT_SESSION_ID}`;
+    console.log('Final Success URL:', finalSuccessUrl);
+
     const sessionConfig: any = {
       mode: isSubscription ? "subscription" : "payment",
       line_items: [
@@ -61,7 +71,7 @@ Deno.serve(async (req: Request) => {
           quantity: 1,
         },
       ],
-      success_url: `${successUrl}${successUrl.includes("?") ? "&" : "?"}session_id={CHECKOUT_SESSION_ID}`,
+      success_url: finalSuccessUrl,
       cancel_url: cancelUrl,
     };
 
@@ -70,6 +80,7 @@ Deno.serve(async (req: Request) => {
     }
 
     const session = await stripe.checkout.sessions.create(sessionConfig);
+    console.log('Stripe session created:', session.id);
 
     return new Response(
       JSON.stringify({ url: session.url, sessionId: session.id }),
