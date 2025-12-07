@@ -53,8 +53,8 @@ export default function PricingPage() {
             priceId,
             isSubscription,
             customerEmail: user?.email,
-            successUrl: `${window.location.origin}/success`,
-            cancelUrl: `${window.location.origin}/pricing?checkout=cancelled`,
+            successUrl: `${window.location.origin}/#/success`,
+            cancelUrl: `${window.location.origin}/#/pricing?checkout=cancelled`,
           }),
         }
       );
