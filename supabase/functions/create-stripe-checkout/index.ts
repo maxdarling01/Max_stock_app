@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import Stripe from "npm:stripe@17.4.0";
+import { createClient } from "npm:@supabase/supabase-js@2.57.4";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -35,8 +36,6 @@ Deno.serve(async (req: Request) => {
     console.log('Price ID:', priceId);
     console.log('Is Subscription:', isSubscription);
     console.log('Customer Email:', customerEmail);
-    console.log('Success URL (base):', successUrl);
-    console.log('Cancel URL:', cancelUrl);
 
     if (!priceId || !successUrl || !cancelUrl) {
       return new Response(
@@ -60,6 +59,60 @@ Deno.serve(async (req: Request) => {
       apiVersion: "2024-11-20.acacia",
     });
 
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
+
+    if (!supabaseUrl || !supabaseAnonKey) {
+      throw new Error("Supabase credentials not configured");
+    }
+
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: "Missing authorization header" }),
+        {
+          status: 401,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: {
+        headers: {
+          Authorization: authHeader,
+        },
+      },
+    });
+
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized - user not found" }),
+        {
+          status: 401,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
+
+    const planTypeMap: Record<string, string> = {
+      'price_1SWMkEAViJR9tCfxxBexPSmD': 'basic',
+      'price_1SWMmWAViJR9tCfxgFABERlT': 'pro',
+      'price_1SWMnBAViJR9tCfxhsunTR4r': 'elite',
+      'price_1SWMo7AViJR9tCfxvo2sIcoP': 'legendary',
+      'price_1SWMosAViJR9tCfxdQEMI5iO': 'personalized',
+    };
+
+    const planType = planTypeMap[priceId] || 'basic';
+
     const finalSuccessUrl = `${successUrl}${successUrl.includes("?") ? "&" : "?"}session_id={CHECKOUT_SESSION_ID}`;
     console.log('Final Success URL:', finalSuccessUrl);
 
@@ -73,14 +126,35 @@ Deno.serve(async (req: Request) => {
       ],
       success_url: finalSuccessUrl,
       cancel_url: cancelUrl,
+      metadata: {
+        user_id: user.id,
+        plan_type: planType,
+      },
     };
 
     if (customerEmail) {
       sessionConfig.customer_email = customerEmail;
     }
 
+    if (isSubscription) {
+      sessionConfig.subscription_data = {
+        metadata: {
+          user_id: user.id,
+          plan_type: planType,
+        },
+      };
+    } else {
+      sessionConfig.payment_intent_data = {
+        metadata: {
+          user_id: user.id,
+          plan_type: planType,
+        },
+      };
+    }
+
     const session = await stripe.checkout.sessions.create(sessionConfig);
     console.log('Stripe session created:', session.id);
+    console.log('Metadata attached:', { user_id: user.id, plan_type: planType });
 
     return new Response(
       JSON.stringify({ url: session.url, sessionId: session.id }),
