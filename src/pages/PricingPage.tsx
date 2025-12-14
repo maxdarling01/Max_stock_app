@@ -1,7 +1,8 @@
 import { Check, ArrowLeft, Shield, Star, Sparkles, XCircle } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../lib/supabase';
 
 const STRIPE_PRICE_IDS = {
   basic: 'price_1SWMkEAViJR9tCfxxBexPSmD',
@@ -13,6 +14,7 @@ const STRIPE_PRICE_IDS = {
 
 export default function PricingPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>('');
 
@@ -38,6 +40,16 @@ export default function PricingPage() {
       return;
     }
 
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session) {
+      setErrorMessage('You must be signed in to subscribe. Redirecting to sign in...');
+      setTimeout(() => {
+        navigate('/signin');
+      }, 1500);
+      return;
+    }
+
     setLoading(priceId);
 
     try {
@@ -47,7 +59,7 @@ export default function PricingPage() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+            'Authorization': `Bearer ${session.access_token}`,
           },
           body: JSON.stringify({
             priceId,
