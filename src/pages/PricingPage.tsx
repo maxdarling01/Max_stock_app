@@ -17,22 +17,19 @@ export default function PricingPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>('');
+  const [hasAttemptedCheckout, setHasAttemptedCheckout] = useState(false);
 
   useEffect(() => {
-    const storedError = localStorage.getItem('stripe_checkout_error');
-    if (storedError) {
-      setErrorMessage(storedError);
-      localStorage.removeItem('stripe_checkout_error');
-    }
+    localStorage.removeItem('stripe_checkout_error');
 
     const params = new URLSearchParams(window.location.search);
     if (params.get('checkout') === 'cancelled') {
-      setErrorMessage('Checkout was cancelled. Please try again or select a different plan.');
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, []);
 
   const handleCheckout = async (priceId: string, isSubscription: boolean) => {
+    setHasAttemptedCheckout(true);
     setErrorMessage('');
 
     if (priceId.includes('REPLACE_WITH_YOUR')) {
@@ -110,7 +107,7 @@ export default function PricingPage() {
           Back to Browse
         </Link>
 
-        {errorMessage && (
+        {hasAttemptedCheckout && errorMessage && (
           <div className="mb-8 p-6 bg-red-900 border-2 border-red-600 rounded-lg flex items-start gap-4 animate-fadeIn">
             <XCircle className="w-6 h-6 text-red-300 flex-shrink-0 mt-1" />
             <div className="flex-1">
