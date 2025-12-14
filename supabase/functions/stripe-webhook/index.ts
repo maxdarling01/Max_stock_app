@@ -185,9 +185,56 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    if (event.type === "invoice.payment_succeeded") {
+      const invoice = event.data.object as any;
+      const subscriptionId = invoice.subscription;
+      const customerEmail = invoice.customer_email;
+
+      if (subscriptionId && customerEmail) {
+        const { data: authUser } = await supabase.auth.admin.listUsers();
+        const user = authUser.users.find((u: any) => u.email === customerEmail);
+
+        if (user) {
+          const { data: existingSub } = await supabase
+            .from("subscriptions")
+            .select("*")
+            .eq("user_id", user.id)
+            .maybeSingle();
+
+          if (existingSub) {
+            const planType = existingSub.plan_type || "basic";
+            const downloadsRemaining = PLAN_DOWNLOADS[planType] || 7;
+            const now = new Date();
+            const periodStart = now;
+            const periodEnd = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+            const { error: updateError } = await supabase
+              .from("subscriptions")
+              .update({
+                downloads_remaining: downloadsRemaining,
+                downloads_used_this_month: 0,
+                subscription_status: "active",
+                current_period_start: periodStart.toISOString(),
+                current_period_end: periodEnd.toISOString(),
+                updated_at: new Date().toISOString(),
+              })
+              .eq("user_id", user.id);
+
+            if (updateError) {
+              console.error("Failed to renew subscription:", updateError);
+            } else {
+              console.log(
+                `Subscription renewed for user ${user.id} with plan ${planType}`
+              );
+            }
+          }
+        }
+      }
+    }
+
     if (event.type === "invoice.payment_failed") {
       const invoice = event.data.object as any;
-      const customerEmail = invoice.customer_email || invoice.receipt_number;
+      const customerEmail = invoice.customer_email;
 
       if (customerEmail) {
         const { data: authUser } = await supabase.auth.admin.listUsers();

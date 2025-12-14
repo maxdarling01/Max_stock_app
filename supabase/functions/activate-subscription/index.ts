@@ -91,21 +91,34 @@ Deno.serve(async (req: Request) => {
     }
 
     const product = await stripe.products.retrieve(lineItem.price.product as string);
-    const planType = product.metadata?.plan_type || 'basic';
+    const newPlanType = product.metadata?.plan_type || 'basic';
+    const newDownloadsCount = PLAN_DOWNLOADS[newPlanType] || 7;
 
-    const now = new Date();
-    const periodStart = now;
-    const periodEnd = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+    const { data: existingSub } = await supabase
+      .from('subscriptions')
+      .select('*')
+      .eq('user_id', user.id)
+      .maybeSingle();
 
-    const downloadsRemaining = PLAN_DOWNLOADS[planType] || 7;
+    let downloadsRemaining = newDownloadsCount;
+    let periodStart = new Date();
+    let periodEnd = new Date(periodStart.getTime() + 30 * 24 * 60 * 60 * 1000);
+    let downloadsUsedThisMonth = 0;
+
+    if (existingSub && existingSub.subscription_status === 'active') {
+      downloadsRemaining = (existingSub.downloads_remaining || 0) + newDownloadsCount;
+      periodStart = new Date(existingSub.current_period_start);
+      periodEnd = new Date(existingSub.current_period_end);
+      downloadsUsedThisMonth = existingSub.downloads_used_this_month || 0;
+    }
 
     const { error: updateError } = await supabase
       .from('subscriptions')
       .upsert({
         user_id: user.id,
-        plan_type: planType,
+        plan_type: newPlanType,
         downloads_remaining: downloadsRemaining,
-        downloads_used_this_month: 0,
+        downloads_used_this_month: downloadsUsedThisMonth,
         subscription_status: 'active',
         current_period_start: periodStart.toISOString(),
         current_period_end: periodEnd.toISOString(),
@@ -122,9 +135,10 @@ Deno.serve(async (req: Request) => {
 
     const responseData = {
       success: true,
-      planType,
+      planType: newPlanType,
       downloadsRemaining,
       periodEnd: periodEnd.toISOString(),
+      isUpgrade: !!existingSub,
     };
 
     return new Response(
