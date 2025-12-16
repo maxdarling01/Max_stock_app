@@ -60,10 +60,9 @@ Deno.serve(async (req: Request) => {
     });
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
-    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
 
-    if (!supabaseUrl || !supabaseAnonKey) {
-      throw new Error("Supabase credentials not configured");
+    if (!supabaseUrl) {
+      throw new Error("Supabase URL not configured");
     }
 
     const authHeader = req.headers.get("Authorization");
@@ -80,15 +79,19 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
     const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
 
-    if (userError || !user) {
-      console.error("Auth error:", userError);
+    let userId: string;
+    try {
+      const parts = token.split('.');
+      if (parts.length !== 3) throw new Error('Invalid token format');
+      const payload = JSON.parse(atob(parts[1]));
+      userId = payload.sub;
+      if (!userId) throw new Error('No user ID in token');
+    } catch (e) {
+      console.error("Token parsing error:", e);
       return new Response(
-        JSON.stringify({ error: "Unauthorized - user not found" }),
+        JSON.stringify({ error: "Invalid authentication token" }),
         {
           status: 401,
           headers: {
@@ -123,7 +126,7 @@ Deno.serve(async (req: Request) => {
       success_url: finalSuccessUrl,
       cancel_url: cancelUrl,
       metadata: {
-        user_id: user.id,
+        user_id: userId,
         plan_type: planType,
       },
     };
@@ -135,14 +138,14 @@ Deno.serve(async (req: Request) => {
     if (isSubscription) {
       sessionConfig.subscription_data = {
         metadata: {
-          user_id: user.id,
+          user_id: userId,
           plan_type: planType,
         },
       };
     } else {
       sessionConfig.payment_intent_data = {
         metadata: {
-          user_id: user.id,
+          user_id: userId,
           plan_type: planType,
         },
       };
@@ -150,7 +153,7 @@ Deno.serve(async (req: Request) => {
 
     const session = await stripe.checkout.sessions.create(sessionConfig);
     console.log('Stripe session created:', session.id);
-    console.log('Metadata attached:', { user_id: user.id, plan_type: planType });
+    console.log('Metadata attached:', { user_id: userId, plan_type: planType });
 
     return new Response(
       JSON.stringify({ url: session.url, sessionId: session.id }),
