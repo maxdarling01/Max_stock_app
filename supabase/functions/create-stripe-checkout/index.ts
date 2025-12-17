@@ -60,9 +60,10 @@ Deno.serve(async (req: Request) => {
     });
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
 
-    if (!supabaseUrl) {
-      throw new Error("Supabase URL not configured");
+    if (!supabaseUrl || !supabaseAnonKey) {
+      throw new Error("Supabase credentials not configured");
     }
 
     const authHeader = req.headers.get("Authorization");
@@ -79,11 +80,20 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const token = authHeader.trim().replace(/^Bearer\s+/i, '');
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: {
+        headers: {
+          Authorization: authHeader,
+        },
+      },
+    });
 
-    if (!token) {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      console.error("Auth error:", userError);
       return new Response(
-        JSON.stringify({ error: "Authorization token is empty" }),
+        JSON.stringify({ error: "Unauthorized - user not found" }),
         {
           status: 401,
           headers: {
@@ -94,44 +104,7 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    let userId: string;
-    try {
-      const parts = token.split('.');
-      if (parts.length !== 3) {
-        console.error("Invalid token format - parts length:", parts.length);
-        throw new Error('Token must have 3 parts separated by dots');
-      }
-
-      let payload;
-      try {
-        payload = JSON.parse(atob(parts[1]));
-      } catch (decodeError) {
-        console.error("Failed to decode payload:", decodeError);
-        throw new Error('Failed to decode token payload');
-      }
-
-      console.log("Token payload fields:", Object.keys(payload));
-
-      userId = payload.sub || payload.user_id;
-      if (!userId) {
-        console.error("No user ID found in token. Available fields:", Object.keys(payload));
-        throw new Error('Token does not contain user ID');
-      }
-    } catch (e) {
-      console.error("Token parsing error:", e);
-      return new Response(
-        JSON.stringify({
-          error: e instanceof Error ? `Token validation failed: ${e.message}` : "Invalid authentication token"
-        }),
-        {
-          status: 401,
-          headers: {
-            ...corsHeaders,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-    }
+    const userId = user.id;
 
     const planTypeMap: Record<string, string> = {
       'price_1SWMkEAViJR9tCfxxBexPSmD': 'basic',
