@@ -69,7 +69,7 @@ Deno.serve(async (req: Request) => {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
       return new Response(
-        JSON.stringify({ error: "Missing authorization header" }),
+        JSON.stringify({ error: "Missing Authorization header" }),
         {
           status: 401,
           headers: {
@@ -82,7 +82,22 @@ Deno.serve(async (req: Request) => {
 
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-    const token = authHeader.replace(/^Bearer\s+/i, '');
+    const token = authHeader.replace(/^Bearer\s+/i, '').trim();
+
+    if (!token) {
+      return new Response(
+        JSON.stringify({ error: "Missing access token" }),
+        {
+          status: 401,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
+
+    console.log("Auth header received:", authHeader.slice(0, 20));
 
     const { data: { user }, error: userError } =
     await supabase.auth.getUser(token);
@@ -103,6 +118,7 @@ Deno.serve(async (req: Request) => {
     }
 
     const userId = user.id;
+    console.log("Authenticated user:", userId);
 
     const planTypeMap: Record<string, string> = {
       'price_1SWMkEAViJR9tCfxxBexPSmD': 'basic',
