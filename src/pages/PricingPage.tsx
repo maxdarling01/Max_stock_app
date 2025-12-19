@@ -39,7 +39,7 @@ export default function PricingPage() {
 
     const { data: { session } } = await supabase.auth.getSession();
 
-    if (!session) {
+    if (!session || !session.access_token) {
       setErrorMessage('You must be signed in to subscribe. Redirecting to sign in...');
       setTimeout(() => {
         navigate('/signin');
@@ -50,6 +50,7 @@ export default function PricingPage() {
     setLoading(priceId);
 
     try {
+      console.log('Sending checkout request with access token');
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-stripe-checkout`,
         {
