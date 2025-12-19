@@ -10,10 +10,7 @@ const corsHeaders = {
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
-    return new Response(null, {
-      status: 200,
-      headers: corsHeaders,
-    });
+    return new Response(null, { status: 200, headers: corsHeaders });
   }
 
   if (req.method !== "POST") {
@@ -21,49 +18,45 @@ Deno.serve(async (req: Request) => {
       JSON.stringify({ error: "Method not allowed" }),
       {
         status: 405,
-        headers: {
-          ...corsHeaders,
-          "Content-Type": "application/json",
-        },
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       }
     );
   }
 
   try {
-    const { priceId, isSubscription, customerEmail, successUrl, cancelUrl } = await req.json();
-
-    console.log('Creating checkout session');
-    console.log('Price ID:', priceId);
-    console.log('Is Subscription:', isSubscription);
-    console.log('Customer Email:', customerEmail);
+    // ---------- Parse body ----------
+    const {
+      priceId,
+      isSubscription,
+      customerEmail,
+      successUrl,
+      cancelUrl,
+    } = await req.json();
 
     if (!priceId || !successUrl || !cancelUrl) {
       return new Response(
         JSON.stringify({ error: "Missing required parameters" }),
         {
           status: 400,
-          headers: {
-            ...corsHeaders,
-            "Content-Type": "application/json",
-          },
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
         }
       );
     }
 
+    // ---------- Stripe ----------
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-    if (!stripeKey) {
-      throw new Error("STRIPE_SECRET_KEY is not configured");
-    }
+    if (!stripeKey) throw new Error("STRIPE_SECRET_KEY not configured");
 
     const stripe = new Stripe(stripeKey, {
       apiVersion: "2024-11-20.acacia",
     });
 
+    // ---------- Supabase ----------
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
 
     if (!supabaseUrl || !supabaseAnonKey) {
-      throw new Error("Supabase credentials not configured");
+      throw new Error("Supabase env vars not configured");
     }
 
     const authHeader = req.headers.get("Authorization");
@@ -72,36 +65,27 @@ Deno.serve(async (req: Request) => {
         JSON.stringify({ error: "Missing Authorization header" }),
         {
           status: 401,
-          headers: {
-            ...corsHeaders,
-            "Content-Type": "application/json",
-          },
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
         }
       );
     }
 
-    const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
-    const token = authHeader.replace(/^Bearer\s+/i, '').trim();
-
-    if (!token) {
-      return new Response(
-        JSON.stringify({ error: "Missing access token" }),
-        {
-          status: 401,
+    // IMPORTANT: forward Authorization header into Supabase client
+    const supabase = createClient(
+      supabaseUrl,
+      supabaseAnonKey,
+      {
+        global: {
           headers: {
-            ...corsHeaders,
-            "Content-Type": "application/json",
+            Authorization: authHeader,
           },
-        }
-      );
-    }
+        },
+      }
+    );
 
-    console.log("Auth header received:", authHeader.slice(0, 20));
-
+    // DO NOT PASS TOKEN — Supabase reads it from headers
     const { data: { user }, error: userError } =
-    await supabase.auth.getUser(token);
-
+      await supabase.auth.getUser();
 
     if (userError || !user) {
       console.error("Auth error:", userError);
@@ -109,38 +93,32 @@ Deno.serve(async (req: Request) => {
         JSON.stringify({ error: "Unauthorized - user not found" }),
         {
           status: 401,
-          headers: {
-            ...corsHeaders,
-            "Content-Type": "application/json",
-          },
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
         }
       );
     }
 
     const userId = user.id;
-    console.log("Authenticated user:", userId);
 
+    // ---------- Plan mapping ----------
     const planTypeMap: Record<string, string> = {
-      'price_1SWMkEAViJR9tCfxxBexPSmD': 'basic',
-      'price_1SWMmWAViJR9tCfxgFABERlT': 'pro',
-      'price_1SWMnBAViJR9tCfxhsunTR4r': 'elite',
-      'price_1SWMo7AViJR9tCfxvo2sIcoP': 'legendary',
-      'price_1SWMosAViJR9tCfxdQEMI5iO': 'personalized',
+      "price_1SWMkEAViJR9tCfxxBexPSmD": "basic",
+      "price_1SWMmWAViJR9tCfxgFABERlT": "pro",
+      "price_1SWMnBAViJR9tCfxhsunTR4r": "elite",
+      "price_1SWMo7AViJR9tCfxvo2sIcoP": "legendary",
+      "price_1SWMosAViJR9tCfxdQEMI5iO": "personalized",
     };
 
-    const planType = planTypeMap[priceId] || 'basic';
+    const planType = planTypeMap[priceId] ?? "basic";
 
-    const finalSuccessUrl = `${successUrl}${successUrl.includes("?") ? "&" : "?"}session_id={CHECKOUT_SESSION_ID}`;
-    console.log('Final Success URL:', finalSuccessUrl);
+    const finalSuccessUrl =
+      `${successUrl}${successUrl.includes("?") ? "&" : "?"}` +
+      "session_id={CHECKOUT_SESSION_ID}";
 
-    const sessionConfig: any = {
+    // ---------- Checkout config ----------
+    const sessionConfig: Stripe.Checkout.SessionCreateParams = {
       mode: isSubscription ? "subscription" : "payment",
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
+      line_items: [{ price: priceId, quantity: 1 }],
       success_url: finalSuccessUrl,
       cancel_url: cancelUrl,
       metadata: {
@@ -169,30 +147,28 @@ Deno.serve(async (req: Request) => {
       };
     }
 
+    // ---------- Create session ----------
     const session = await stripe.checkout.sessions.create(sessionConfig);
-    console.log('Stripe session created:', session.id);
-    console.log('Metadata attached:', { user_id: userId, plan_type: planType });
 
     return new Response(
       JSON.stringify({ url: session.url, sessionId: session.id }),
       {
         status: 200,
-        headers: {
-          ...corsHeaders,
-          "Content-Type": "application/json",
-        },
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       }
     );
   } catch (error) {
-    console.error("Stripe checkout error:", error);
+    console.error("Checkout error:", error);
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Failed to create checkout session" }),
+      JSON.stringify({
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to create checkout session",
+      }),
       {
         status: 500,
-        headers: {
-          ...corsHeaders,
-          "Content-Type": "application/json",
-        },
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       }
     );
   }
